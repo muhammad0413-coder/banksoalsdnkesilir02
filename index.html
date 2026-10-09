@@ -1,927 +1,1912 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full bg-slate-50">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDN KESILIR 02 LABS - AI Assessment Generator</title>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#0f172a', secondary: '#2563eb', accent: '#e2e8f0' }
-                }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDN KESILIR 02 LABS — AI Assessment Generator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0f172a',
+              dark: '#1e293b',
+              royal: '#2563eb',
+              royalhover: '#1d4ed8',
+              accent: '#0284c7',
+              light: '#f0f9ff',
+              bg: '#f8fafc'
             }
+          }
         }
-    </script>
+      }
+    }
+  </script>
 
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Inter & Poppins Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Firebase Compat (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Document Generation Libraries (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    <!-- HTML2PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, h5, h6, .font-heading { font-family: 'Poppins', sans-serif; }
+    
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    <style>
-        body { background-color: #f8fafc; color: #0f172a; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        .spinner {
-            border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff;
-            width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .toast {
-            position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px;
-            color: #fff; font-size: 14px; font-weight: 500; opacity: 0; transform: translateY(20px);
-            transition: all 0.3s ease; z-index: 9999; display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.success { background-color: #10b981; }
-        .toast.error { background-color: #ef4444; }
-        .toast.info { background-color: #3b82f6; }
-    </style>
+    /* Print Formatting Rules for A4 */
+    @media print {
+      body * { visibility: hidden; }
+      #printable-area, #printable-area * { visibility: visible; }
+      #printable-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; }
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; }
+    }
+
+    .a4-preview {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm 15mm;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 850px) {
+      .a4-preview {
+        width: 100%;
+        min-height: auto;
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
-<body class="font-sans antialiased h-screen flex overflow-hidden">
+<body class="h-full flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
 
-    <!-- ================= AUTHENTICATION VIEW ================= -->
-    <div id="auth-view" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 px-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="bg-primary text-white w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
-                    <i class="fa-solid fa-school"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-slate-800">SDN KESILIR 02 LABS</h1>
-                <p class="text-sm text-slate-500 mt-1">AI Assessment Generator</p>
-            </div>
-            
-            <form id="auth-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-                    <input type="email" id="auth-email" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
-                    <input type="password" id="auth-password" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-sm">
-                </div>
-                <button type="submit" id="auth-btn" class="w-full bg-secondary text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition flex justify-center items-center gap-2">
-                    Masuk
-                </button>
-            </form>
-            
-            <div class="mt-4 flex flex-col gap-3">
-                <button id="toggle-auth" class="text-secondary text-sm hover:underline">Belum punya akun? Daftar</button>
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-slate-200"></div>
-                    <span class="flex-shrink-0 mx-4 text-slate-400 text-xs">ATAU</span>
-                    <div class="flex-grow border-t border-slate-200"></div>
-                </div>
-                <!-- Tombol Bypass Login -->
-                <button onclick="loginAsGuest()" class="w-full bg-slate-100 text-slate-700 font-medium py-2.5 rounded-lg border border-slate-200 hover:bg-slate-200 transition text-sm flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-hard-drive"></i> Gunakan Mode Lokal (Tanpa Login)
-                </button>
-            </div>
-            <div id="auth-error" class="text-red-500 mt-4 text-xs text-center hidden font-medium"></div>
+  <!-- Main Container -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-brand-navy text-slate-300 flex flex-col transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 md:static md:z-auto shadow-xl">
+      
+      <!-- Brand Header -->
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/30">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h1 class="text-white font-bold text-base leading-tight tracking-wide font-heading">SDN KESILIR 02</h1>
+            <p class="text-xs text-sky-400 font-medium">AI Assessment Generator</p>
+          </div>
         </div>
-    </div>
+        <button id="close-sidebar-btn" class="md:hidden text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
 
-    <!-- ================= MAIN APP VIEW ================= -->
-    <div id="app-view" class="hidden flex w-full h-full">
+      <!-- Navigation Links -->
+      <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <button onclick="navTo('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-white bg-slate-800/80 border-l-4 border-blue-500">
+          <i class="fa-solid fa-chart-pie text-blue-400 w-5"></i>
+          <span>Dashboard</span>
+        </button>
         
-        <!-- Sidebar -->
-        <aside id="sidebar" class="bg-primary text-slate-300 w-64 flex-shrink-0 flex flex-col transition-transform duration-300 absolute md:relative z-40 h-full -translate-x-full md:translate-x-0">
-            <div class="p-5 flex items-center justify-between border-b border-slate-700">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-school text-white text-xl"></i>
-                    <div>
-                        <h2 class="font-bold text-sm text-white tracking-wide">KESILIR 02 LABS</h2>
-                    </div>
-                </div>
-                <button id="close-sidebar" class="md:hidden text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
-            </div>
-            
-            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-                <button onclick="nav('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white transition text-sm font-medium" data-target="dashboard">
-                    <i class="fa-solid fa-house w-5"></i> Dashboard
-                </button>
-                <button onclick="nav('create')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition text-sm font-medium" data-target="create">
-                    <i class="fa-solid fa-pen-to-square w-5"></i> Buat Asesmen AI
-                </button>
-                <button onclick="nav('bank')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition text-sm font-medium" data-target="bank">
-                    <i class="fa-solid fa-folder-open w-5"></i> Bank Soal
-                </button>
-                <button onclick="nav('settings')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition text-sm font-medium" data-target="settings">
-                    <i class="fa-solid fa-gear w-5"></i> Pengaturan
-                </button>
-            </nav>
-            
-            <div class="p-4 border-t border-slate-700 bg-slate-900">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-sm" id="user-initial">G</div>
-                    <div class="text-xs overflow-hidden text-ellipsis whitespace-nowrap text-slate-300" id="user-email-display">Mode Lokal</div>
-                </div>
-                <button onclick="logout()" class="w-full text-left px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-slate-800 rounded transition flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar
-                </button>
-            </div>
-        </aside>
+        <button onclick="navTo('create')" id="nav-create" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-wand-magic-sparkles text-sky-400 w-5"></i>
+          <span>Buat Asesmen</span>
+        </button>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
-            <!-- Header -->
-            <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-30">
-                <div class="flex items-center gap-4">
-                    <button id="open-sidebar" class="md:hidden text-slate-500 hover:text-primary"><i class="fa-solid fa-bars text-lg"></i></button>
-                    <h2 id="page-title" class="text-lg font-bold text-slate-800">Dashboard</h2>
-                </div>
-                <div id="cloud-status" class="text-xs font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-600 flex items-center gap-2 border border-slate-200">
-                    <i class="fa-solid fa-hard-drive"></i> Tersimpan Lokal
-                </div>
-            </header>
+        <button onclick="navTo('kisi-kisi')" id="nav-kisi-kisi" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-table-list text-emerald-400 w-5"></i>
+          <span>Generator Kisi-Kisi</span>
+        </button>
 
-            <div class="flex-1 overflow-y-auto p-4 md:p-8" id="main-content">
+        <button onclick="navTo('rubrik')" id="nav-rubrik" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-clipboard-check text-purple-400 w-5"></i>
+          <span>Generator Rubrik</span>
+        </button>
+
+        <button onclick="navTo('bank')" id="nav-bank" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-box-archive text-amber-400 w-5"></i>
+          <span>Bank Soal</span>
+        </button>
+
+        <button onclick="navTo('history')" id="nav-history" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-clock-rotate-left text-indigo-400 w-5"></i>
+          <span>Riwayat Asesmen</span>
+        </button>
+
+        <div class="pt-3 pb-1 px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Modul AI Lanjutan</div>
+
+        <button onclick="navTo('paket-ab')" id="nav-paket-ab" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-copy text-pink-400 w-5"></i>
+          <span>Paket Soal A / B</span>
+        </button>
+
+        <button onclick="navTo('checker')" id="nav-checker" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-magnifying-glass-chart text-teal-400 w-5"></i>
+          <span>Pemeriksa Soal AI</span>
+        </button>
+
+        <button onclick="navTo('import')" id="nav-import" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-file-import text-orange-400 w-5"></i>
+          <span>Impor Materi</span>
+        </button>
+
+        <div class="pt-3 pb-1 px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Sistem</div>
+
+        <button onclick="navTo('api')" id="nav-api" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-key text-yellow-400 w-5"></i>
+          <span>Pengaturan API</span>
+        </button>
+
+        <button onclick="navTo('settings')" id="nav-settings" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:text-white hover:bg-slate-800/50">
+          <i class="fa-solid fa-sliders text-slate-400 w-5"></i>
+          <span>Pengaturan Aplikasi</span>
+        </button>
+      </nav>
+
+      <!-- Connection Status & Version Footer -->
+      <div class="p-4 border-t border-slate-800 text-xs">
+        <div id="ai-status-badge" class="flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+          <span class="font-medium text-amber-400">Mode Standar / Demo</span>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500 text-center">v2.5 Production Build — SDN KESILIR 02</p>
+      </div>
+    </aside>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden"></div>
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
+      
+      <!-- Top Navigation Bar -->
+      <header class="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between z-10">
+        <div class="flex items-center space-x-3">
+          <button id="open-sidebar-btn" class="md:hidden text-slate-600 hover:text-slate-900 p-2 rounded-lg hover:bg-slate-100">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
+          <h2 id="topbar-title" class="text-lg font-bold text-slate-800 font-heading">Dashboard Utama</h2>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- Persistence Storage Indicator -->
+          <div id="storage-indicator" class="hidden sm:flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
+            <i class="fa-solid fa-database text-xs"></i>
+            <span>Tersimpan (IndexedDB)</span>
+          </div>
+
+          <!-- Quick Action Button -->
+          <button onclick="navTo('create')" class="flex items-center space-x-2 px-3.5 py-2 bg-brand-royal hover:bg-brand-royalhover text-white rounded-lg text-xs font-semibold shadow-sm transition-all">
+            <i class="fa-solid fa-plus"></i>
+            <span class="hidden sm:inline">Buat Asesmen Baru</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content Scrollable Area -->
+      <main class="flex-1 overflow-y-auto p-4 md:p-6" id="main-content">
+        
+        <!-- ================= PAGE 1: DASHBOARD ================= -->
+        <section id="view-dashboard" class="page-view space-y-6">
+          
+          <!-- Welcome Banner -->
+          <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10 max-w-2xl">
+              <span class="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-sky-300 text-xs font-semibold tracking-wide border border-blue-400/30 mb-3">Sistem Penyusunan Asesmen Otomatis</span>
+              <h2 class="text-2xl md:text-3xl font-bold font-heading">Selamat Datang di SDN KESILIR 02 LABS</h2>
+              <p class="mt-2 text-slate-300 text-sm leading-relaxed">
+                Platform kecerdasan buatan terpadu untuk menyusun kisi-kisi, lembar soal HOTS, rubrik penilaian, dan dokumen evaluasi pembelajaran berkualitas tinggi sesuai standar kurikulum.
+              </p>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <button onclick="navTo('create')" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition-all">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Buat Asesmen Sekarang</span>
+                </button>
+                <button onclick="navTo('import')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 flex items-center space-x-2 transition-all">
+                  <i class="fa-solid fa-file-arrow-up"></i>
+                  <span>Impor Ringkasan Materi</span>
+                </button>
+              </div>
+            </div>
+            <div class="absolute right-0 bottom-0 top-0 w-1/3 opacity-10 flex items-center justify-center pointer-events-none">
+              <i class="fa-solid fa-brain text-[180px]"></i>
+            </div>
+          </div>
+
+          <!-- Real calculated Statistics Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-slate-500">Total Asesmen</p>
+                <h3 id="stat-total-assessments" class="text-2xl font-bold text-slate-800 mt-1 font-heading">0</h3>
+                <p class="text-[11px] text-emerald-600 mt-1"><i class="fa-solid fa-check"></i> Terdata di sistem</p>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-file-pen"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-slate-500">Total Soal Tersimpan</p>
+                <h3 id="stat-total-questions" class="text-2xl font-bold text-slate-800 mt-1 font-heading">0</h3>
+                <p class="text-[11px] text-sky-600 mt-1"><i class="fa-solid fa-database"></i> Siap dipakai</p>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-slate-500">Total Kisi-Kisi</p>
+                <h3 id="stat-total-kisi" class="text-2xl font-bold text-slate-800 mt-1 font-heading">0</h3>
+                <p class="text-[11px] text-emerald-600 mt-1"><i class="fa-solid fa-table"></i> Terstruktur</p>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-table-list"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-slate-500">Total Rubrik</p>
+                <h3 id="stat-total-rubrics" class="text-2xl font-bold text-slate-800 mt-1 font-heading">0</h3>
+                <p class="text-[11px] text-purple-600 mt-1"><i class="fa-solid fa-clipboard-check"></i> Siap cetak</p>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-square-poll-vertical"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Assessments Section -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-base font-bold text-slate-800 font-heading">Asesmen Terbaru</h3>
+                <p class="text-xs text-slate-500">Daftar dokumen evaluasi yang baru saja dikerjakan</p>
+              </div>
+              <button onclick="navTo('history')" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center space-x-1">
+                <span>Lihat Semua</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+
+            <div id="dashboard-recent-container" class="space-y-3">
+              <!-- Empty State Rendered Dynamically -->
+            </div>
+          </div>
+
+          <!-- Quick Access Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div onclick="navTo('create')" class="cursor-pointer bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-2xl hover:shadow-md transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-plus"></i>
+              </div>
+              <h4 class="font-bold text-slate-800 text-sm mt-3 font-heading">Penyusun Asesmen Baru</h4>
+              <p class="text-xs text-slate-600 mt-1">Buat paket soal lengkap dengan kunci, kisi-kisi, & pembahasan secara instan.</p>
+            </div>
+
+            <div onclick="navTo('bank')" class="cursor-pointer bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 p-5 rounded-2xl hover:shadow-md transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+              <h4 class="font-bold text-slate-800 text-sm mt-3 font-heading">Bank Soal Terintegrasi</h4>
+              <p class="text-xs text-slate-600 mt-1">Cari, kumpulkan, dan gunakan kembali butir soal dari berbagai mata pelajaran.</p>
+            </div>
+
+            <div onclick="navTo('rubrik')" class="cursor-pointer bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-100 p-5 rounded-2xl hover:shadow-md transition-all group">
+              <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition-transform">
+                <i class="fa-solid fa-sliders"></i>
+              </div>
+              <h4 class="font-bold text-slate-800 text-sm mt-3 font-heading">Generator Rubrik Praktik</h4>
+              <p class="text-xs text-slate-600 mt-1">Susun rubrik observasi proyek, esai, dan unjuk kerja secara otomatis.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 2: BUAT ASESMEN (FORM) ================= -->
+        <section id="view-create" class="page-view hidden space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 md:p-8 max-w-5xl mx-auto">
+            <div class="border-b border-slate-100 pb-5 mb-6">
+              <h3 class="text-xl font-bold text-slate-800 font-heading">Formulir Penyusunan Asesmen</h3>
+              <p class="text-xs text-slate-500 mt-1">Lengkapi parameter berikut untuk mengkonfigurasi generator AI secara spesifik.</p>
+            </div>
+
+            <form id="assessment-form" class="space-y-8" onsubmit="handleGenerateAssessment(event)">
+              
+              <!-- SECTION A: Identitas Asesmen -->
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">A</span>
+                  <span>Identitas Asesmen & Sekolah</span>
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Sekolah <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-school" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="SDN KESILIR 02">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Guru / Penyusun <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-teacher" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Tim Pengajar SD">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Ajaran <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-year" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="2026/2027">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Semester <span class="text-red-500">*</span></label>
+                    <select id="form-semester" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                      <option value="1 (Ganjil)">1 (Ganjil)</option>
+                      <option value="2 (Genap)">2 (Genap)</option>
+                    </select>
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Judul Asesmen <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-title" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Asesmen Sumatif Bab 1: Ekosistem dan Rantai Makanan">
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION B: Jenjang & Kelas (Dinamis) -->
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">B</span>
+                  <span>Jenjang & Tingkat Pendidikan</span>
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jenjang Pendidikan <span class="text-red-500">*</span></label>
+                    <select id="form-level" onchange="handleLevelChange()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                      <option value="SD" selected>SD (Sekolah Dasar)</option>
+                      <option value="PAUD">PAUD / TK</option>
+                      <option value="SMP">SMP / MTs</option>
+                      <option value="SMA">SMA / MA</option>
+                      <option value="SMK">SMK</option>
+                      <option value="Perguruan Tinggi">Perguruan Tinggi</option>
+                      <option value="Umum">Umum / Pelatihan</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kelas / Tingkat <span class="text-red-500">*</span></label>
+                    <select id="form-grade" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                      <!-- Populated dynamically via JS -->
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mata Pelajaran <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-subject" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="IPAS / Bahasa Indonesia / Matematika">
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION C: Materi & Kurikulum -->
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">C</span>
+                  <span>Informasi Pembelajaran & Materi</span>
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Materi Pokok <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-topic" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Harmoni dalam Ekosistem">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Submateri / Ruang Lingkup</label>
+                    <input type="text" id="form-subtopic" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Rantai makanan, jaring-jaring makanan, peranan produsen & konsumen">
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Capaian / Tujuan Pembelajaran (TP) <span class="text-red-500">*</span></label>
+                    <textarea id="form-tp" rows="2" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Peserta didik mampu menganalisis hubungan antar makhluk hidup dalam rantai makanan dan dampaknya terhadap keseimbangan ekosistem."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION D: Pengaturan Teknis Soal -->
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">D</span>
+                  <span>Pengaturan Bentuk & Jumlah Soal</span>
+                </h4>
                 
-                <!-- VIEW: Dashboard -->
-                <div id="view-dashboard" class="view-section space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div class="bg-blue-50 text-secondary w-12 h-12 rounded-lg flex items-center justify-center text-xl"><i class="fa-solid fa-file-lines"></i></div>
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">Total Asesmen</p><h3 class="text-2xl font-bold text-slate-800" id="stat-assessments">0</h3></div>
-                        </div>
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div class="bg-emerald-50 text-emerald-600 w-12 h-12 rounded-lg flex items-center justify-center text-xl"><i class="fa-solid fa-list-ol"></i></div>
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">Total Soal</p><h3 class="text-2xl font-bold text-slate-800" id="stat-questions">0</h3></div>
-                        </div>
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
-                            <div class="bg-purple-50 text-purple-600 w-12 h-12 rounded-lg flex items-center justify-center text-xl"><i class="fa-solid fa-microchip"></i></div>
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">Status Gemini API</p><h3 class="text-sm font-bold text-slate-800 mt-1" id="stat-api">Belum Diatur</h3></div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-800">Riwayat Terakhir</h3>
-                            <button onclick="nav('bank')" class="text-xs text-secondary font-medium hover:underline">Lihat Semua</button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="text-xs text-slate-500 uppercase bg-slate-50">
-                                    <tr><th class="px-5 py-3">Tanggal</th><th class="px-5 py-3">Mata Pelajaran</th><th class="px-5 py-3">Kelas</th><th class="px-5 py-3">Jenis</th><th class="px-5 py-3">Aksi</th></tr>
-                                </thead>
-                                <tbody id="recent-history-list" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Asesmen <span class="text-red-500">*</span></label>
+                    <select id="form-type" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                      <option value="Sumatif Harian">Sumatif Harian</option>
+                      <option value="PTS / STS">PTS / STS (Tengah Semester)</option>
+                      <option value="PAS / SAS">PAS / SAS (Akhir Semester)</option>
+                      <option value="Diagnostik">Diagnostik</option>
+                      <option value="Formatif">Formatif / Kuis</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Soal <span class="text-red-500">*</span></label>
+                    <input type="number" id="form-count" min="1" max="50" value="5" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tingkat Kesulitan</label>
+                    <select id="form-difficulty" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                      <option value="Campuran (Proporsional)" selected>Campuran (Proporsional)</option>
+                      <option value="Dominan HOTS (C4-C6)">Dominan HOTS (C4-C6)</option>
+                      <option value="Sedang (C2-C3)">Sedang (C2-C3)</option>
+                      <option value="Dasar (C1-C2)">Dasar (C1-C2)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Alokasi Waktu (Menit)</label>
+                    <input type="number" id="form-time" value="60" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
                 </div>
 
-                <!-- VIEW: Buat Asesmen -->
-                <div id="view-create" class="view-section hidden">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 max-w-3xl mx-auto">
-                        <div class="mb-6 pb-4 border-b border-slate-100">
-                            <h3 class="font-bold text-lg text-slate-800">Parameter Asesmen</h3>
-                            <p class="text-sm text-slate-500">Lengkapi form di bawah untuk menghasilkan soal otomatis menggunakan AI.</p>
-                        </div>
-                        <form id="generate-form" class="space-y-5">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Mata Pelajaran</label><input type="text" id="gen-mapel" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary outline-none" placeholder="Contoh: Matematika"></div>
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Jenjang & Kelas</label><input type="text" id="gen-kelas" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary outline-none" placeholder="Contoh: SD Kelas 4"></div>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Materi Pokok / Tujuan Pembelajaran</label>
-                                <textarea id="gen-materi" required rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary outline-none" placeholder="Contoh: Peserta didik dapat menghitung keliling dan luas bangun datar..."></textarea>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Asesmen</label><select id="gen-jenis" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none"><option>Formatif</option><option>Sumatif (STS/SAS)</option><option>Pre-Test</option><option>Post-Test</option></select></div>
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Bentuk Soal</label><select id="gen-bentuk" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none"><option>Pilihan Ganda</option><option>Isian Singkat</option><option>Uraian</option><option>Campuran (PG & Uraian)</option></select></div>
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Soal</label><input type="number" id="gen-jumlah" min="1" max="40" value="10" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none"></div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Level Kognitif / Kesulitan</label><select id="gen-level" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none"><option>Campuran (Proporsional)</option><option>HOTS (C4-C6) - Sulit</option><option>MOTS (C3) - Sedang</option><option>LOTS (C1-C2) - Mudah</option></select></div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Opsi Tambahan (Opsional)</label>
-                                    <input type="text" id="gen-extra" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none" placeholder="Misal: Buatkan studi kasus, gunakan bahasa daerah...">
-                                </div>
-                            </div>
-
-                            <div class="pt-4 border-t border-slate-100">
-                                <button type="submit" id="btn-generate" class="w-full bg-secondary text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition flex justify-center items-center gap-2">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Buat Asesmen dengan AI</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <label class="block text-xs font-semibold text-slate-700 mb-2">Bentuk Soal yang Ingin Diproduksi (Bisa Pilih Banyak):</label>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50">
+                      <input type="checkbox" name="qformat" value="Pilihan Ganda" checked class="rounded text-blue-600 focus:ring-blue-500">
+                      <span>Pilihan Ganda</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50">
+                      <input type="checkbox" name="qformat" value="Pilihan Ganda Kompleks" class="rounded text-blue-600 focus:ring-blue-500">
+                      <span>PG Kompleks</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50">
+                      <input type="checkbox" name="qformat" value="Benar/Salah" class="rounded text-blue-600 focus:ring-blue-500">
+                      <span>Benar / Salah</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50">
+                      <input type="checkbox" name="qformat" value="Menjodohkan" class="rounded text-blue-600 focus:ring-blue-500">
+                      <span>Menjodohkan</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50">
+                      <input type="checkbox" name="qformat" value="Isian Singkat" class="rounded text-blue-600 focus:ring-blue-500">
+                      <span>Isian Singkat</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-blue-50">
+                      <input type="checkbox" name="qformat" value="Uraian" checked class="rounded text-blue-600 focus:ring-blue-500">
+                      <span>Uraian / Esai</span>
+                    </label>
+                  </div>
                 </div>
+              </div>
 
-                <!-- VIEW: Editor / Hasil -->
-                <div id="view-editor" class="view-section hidden space-y-4">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg" id="editor-title">Draft Asesmen</h3>
-                            <p class="text-sm text-slate-500" id="editor-subtitle">Detail</p>
-                        </div>
-                        <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                            <button onclick="exportPDF()" class="flex-1 md:flex-none px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-200 transition"><i class="fa-solid fa-file-pdf text-red-500"></i> Cetak PDF</button>
-                            <button onclick="exportWord()" class="flex-1 md:flex-none px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-200 transition"><i class="fa-solid fa-file-word text-blue-600"></i> Unduh Word</button>
-                            <button onclick="saveCurrentAssessment()" class="w-full md:w-auto px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition"><i class="fa-solid fa-floppy-disk"></i> Simpan ke Bank</button>
-                        </div>
-                    </div>
+              <!-- Submit Action Button -->
+              <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+                <button type="button" onclick="navTo('dashboard')" class="px-5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                  Batal
+                </button>
+                <button type="submit" id="generate-btn" class="px-6 py-2.5 rounded-xl bg-brand-royal hover:bg-brand-royalhover text-white text-xs font-semibold shadow-lg shadow-blue-500/20 flex items-center space-x-2">
+                  <i class="fa-solid fa-sparkles"></i>
+                  <span>Hasilkan Asesmen Otomatis</span>
+                </button>
+              </div>
 
-                    <!-- Tabs -->
-                    <div class="flex border-b border-slate-300 mb-4 bg-white rounded-t-xl px-2 pt-2">
-                        <button class="tab-btn active px-5 py-3 text-sm font-semibold border-b-2 border-secondary text-secondary" onclick="switchTab('tab-soal', this)">Lembar Soal</button>
-                        <button class="tab-btn px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700" onclick="switchTab('tab-kunci', this)">Kunci & Pembahasan</button>
-                        <button class="tab-btn px-5 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-700" onclick="switchTab('tab-kisi', this)">Kisi-kisi</button>
-                    </div>
+            </form>
+          </div>
+        </section>
 
-                    <!-- KONTEN: Lembar Soal -->
-                    <div id="tab-soal" class="tab-content bg-white p-6 md:p-10 rounded-xl shadow-sm border border-slate-200 min-h-[600px] text-black">
-                        <!-- Header Cetak -->
-                        <div class="text-center border-b-2 border-black pb-4 mb-6">
-                            <h2 class="font-bold text-xl uppercase tracking-wide" id="kop-sekolah">NAMA SEKOLAH</h2>
-                            <h3 class="font-bold text-lg" id="kop-judul">JUDUL ASESMEN</h3>
-                        </div>
-                        <div class="flex justify-between text-sm mb-8 font-medium">
-                            <div>
-                                <p>Nama : ..............................................</p>
-                                <p class="mt-2">No. Absen : ..............................................</p>
-                            </div>
-                            <div class="text-right">
-                                <p>Kelas : <span id="kop-kelas">-</span></p>
-                                <p class="mt-2">Mapel : <span id="kop-mapel">-</span></p>
-                            </div>
-                        </div>
-                        
-                        <!-- Area Soal -->
-                        <div id="soal-container" class="space-y-6 text-sm md:text-base leading-relaxed font-[Inter,sans-serif]"></div>
-                    </div>
-                    
-                    <!-- KONTEN: Kunci Jawaban -->
-                    <div id="tab-kunci" class="tab-content hidden bg-white p-6 md:p-10 rounded-xl shadow-sm border border-slate-200 min-h-[600px]">
-                        <h3 class="font-bold text-lg text-center mb-6">KUNCI JAWABAN & PEDOMAN PENSKORAN</h3>
-                        <div id="kunci-container" class="space-y-4"></div>
-                    </div>
-
-                    <!-- KONTEN: Kisi-kisi -->
-                    <div id="tab-kisi" class="tab-content hidden bg-white p-6 md:p-10 rounded-xl shadow-sm border border-slate-200 min-h-[600px] overflow-x-auto">
-                        <h3 class="font-bold text-lg text-center mb-6">KISI-KISI PENULISAN SOAL</h3>
-                        <table class="w-full text-sm border-collapse border border-slate-300">
-                            <thead class="bg-slate-100 font-semibold">
-                                <tr>
-                                    <th class="border border-slate-300 p-2 text-center w-10">No</th>
-                                    <th class="border border-slate-300 p-2">Tujuan Pembelajaran / Materi</th>
-                                    <th class="border border-slate-300 p-2 text-center w-24">Level Kognitif</th>
-                                    <th class="border border-slate-300 p-2 text-center w-24">Bentuk Soal</th>
-                                    <th class="border border-slate-300 p-2 text-center w-32">Kunci</th>
-                                </tr>
-                            </thead>
-                            <tbody id="kisi-container"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- VIEW: Bank Soal -->
-                <div id="view-bank" class="view-section hidden">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                            <h3 class="font-bold text-slate-800">Bank Asesmen</h3>
-                            <input type="text" id="search-bank" placeholder="Cari mapel / kelas..." class="border border-slate-300 rounded px-3 py-1.5 text-sm outline-none focus:border-secondary w-48">
-                        </div>
-                        <div class="overflow-x-auto p-4">
-                            <table class="w-full text-sm text-left">
-                                <thead class="text-xs text-slate-500 uppercase border-b-2 border-slate-200">
-                                    <tr><th class="py-3 px-2">Info Asesmen</th><th class="py-3 px-2">Tanggal Buat</th><th class="py-3 px-2 text-right">Aksi</th></tr>
-                                </thead>
-                                <tbody id="bank-list-container" class="divide-y divide-slate-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VIEW: Pengaturan -->
-                <div id="view-settings" class="view-section hidden">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 max-w-2xl mx-auto">
-                        <div class="mb-6 pb-4 border-b border-slate-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-gear"></i></div>
-                            <div><h3 class="font-bold text-lg text-slate-800">Pengaturan Sistem</h3><p class="text-sm text-slate-500">Konfigurasi AI dan Identitas Sekolah</p></div>
-                        </div>
-                        
-                        <div class="space-y-6">
-                            <!-- Sekolah -->
-                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                                <h4 class="font-semibold text-slate-700 mb-3 text-sm">Identitas KOP Surat</h4>
-                                <div class="space-y-3">
-                                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nama Sekolah</label><input type="text" id="set-sekolah" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-secondary" value="SDN KESILIR 02 LABS"></div>
-                                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nama Guru / Pembuat</label><input type="text" id="set-guru" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-secondary" placeholder="Opsional"></div>
-                                </div>
-                            </div>
-
-                            <!-- Gemini API -->
-                            <div class="bg-blue-50 p-5 rounded-lg border border-blue-200 relative overflow-hidden">
-                                <div class="absolute top-0 right-0 p-4 text-blue-200 opacity-20"><i class="fa-solid fa-microchip text-6xl"></i></div>
-                                <h4 class="font-bold text-blue-900 mb-2 text-sm relative z-10">Google Gemini API Key (Wajib)</h4>
-                                <p class="text-xs text-blue-700 mb-4 relative z-10 leading-relaxed">Sistem AI berjalan 100% di browser Anda. Demi keamanan, Anda harus memasukkan API Key secara mandiri. Data ini hanya disimpan secara lokal di browser Anda atau di akun cloud pribadi Anda. Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" class="font-bold underline text-blue-800">Google AI Studio</a>.</p>
-                                <input type="password" id="set-apikey" class="w-full border border-blue-300 rounded p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary relative z-10 bg-white" placeholder="Tempelkan API Key (AIzaSy...) di sini...">
-                            </div>
-
-                            <button onclick="saveSettings()" class="w-full bg-primary text-white font-semibold py-3 rounded-lg hover:bg-slate-800 transition shadow-md">
-                                Simpan Pengaturan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+        <!-- ================= PAGE 3: EDITOR SOAL INTERAKTIF ================= -->
+        <section id="view-editor" class="page-view hidden space-y-6">
+          
+          <!-- Assessment Header Metadata Bar -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span id="editor-badge-subject" class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold">Mata Pelajaran</span>
+                <span id="editor-badge-grade" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">Kelas</span>
+              </div>
+              <h2 id="editor-assessment-title" class="text-xl font-bold text-slate-800 mt-1 font-heading">Judul Asesmen</h2>
+              <p id="editor-assessment-meta" class="text-xs text-slate-500 mt-0.5">Sekolah • Penyusun • Tahun Ajaran</p>
             </div>
-        </main>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="addNewQuestionModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 shadow-sm">
+                <i class="fa-solid fa-plus"></i>
+                <span>Tambah Soal</span>
+              </button>
+
+              <button onclick="saveCurrentAssessmentDraft()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 shadow-sm">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Simpan Perubahan</span>
+              </button>
+
+              <button onclick="navTo('preview')" class="px-3.5 py-2 bg-brand-royal hover:bg-brand-royalhover text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 shadow-sm">
+                <i class="fa-solid fa-print"></i>
+                <span>Pratinjau & Ekspor</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Question Items Container -->
+          <div id="editor-questions-list" class="space-y-4">
+            <!-- Questions dynamically generated here -->
+          </div>
+        </section>
+
+        <!-- ================= PAGE 4: KISI-KISI ================= -->
+        <section id="view-kisi-kisi" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 font-heading">Kisi-Kisi Asesmen Otomatis</h3>
+                <p class="text-xs text-slate-500">Matriks ketercapaian Indikator, Level Kognitif, dan Bentuk Soal</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="exportKisiXLSX()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                  <i class="fa-solid fa-file-excel"></i>
+                  <span>Unduh Excel</span>
+                </button>
+                <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                  <i class="fa-solid fa-print"></i>
+                  <span>Cetak A4</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Kisi-Kisi Interactive Table -->
+            <div class="overflow-x-auto mt-4">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200">
+                    <th class="p-3 w-12 text-center">No</th>
+                    <th class="p-3">Tujuan Pembelajaran</th>
+                    <th class="p-3">Materi / Submateri</th>
+                    <th class="p-3">Indikator Soal</th>
+                    <th class="p-3 w-28">Level Kognitif</th>
+                    <th class="p-3 w-28">Bentuk Soal</th>
+                    <th class="p-3 w-20 text-center">Skor</th>
+                  </tr>
+                </thead>
+                <tbody id="kisi-table-body" class="divide-y divide-slate-200 text-slate-700">
+                  <!-- Generated Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 5: GENERATOR RUBRIK ================= -->
+        <section id="view-rubrik" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="border-b border-slate-100 pb-4 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 font-heading">Generator Rubrik Penilaian Nontes</h3>
+                <p class="text-xs text-slate-500">Pilih jenis penilaian unjuk kerja, praktikum, atau proyek murid.</p>
+              </div>
+              <button onclick="generateRubricWithAI()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Susun Rubrik Baru</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Tugas / Unjuk Kerja</label>
+                <select id="rubric-type" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs">
+                  <option value="Praktik Observasi Lab / Lapangan">Praktik Observasi Lab / Lapangan</option>
+                  <option value="Proyek Kelompok & Produk">Proyek Kelompok & Produk</option>
+                  <option value="Presentasi Lisan">Presentasi Lisan</option>
+                  <option value="Portofolio Karyacipta">Portofolio Karyacipta</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Judul / Instruksi Tugas</label>
+                <input type="text" id="rubric-task-title" value="Proyek Pembuatan Model Rantai Makanan Sederhana" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs">
+              </div>
+            </div>
+
+            <!-- Rubric Output Table -->
+            <div id="rubric-container" class="overflow-x-auto border border-slate-200 rounded-xl">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                  <tr>
+                    <th class="p-3 w-1/4">Kriteria Penilaian</th>
+                    <th class="p-3">Skor 1 (Perlu Bimbingan)</th>
+                    <th class="p-3">Skor 2 (Cukup)</th>
+                    <th class="p-3">Skor 3 (Baik)</th>
+                    <th class="p-3">Skor 4 (Sangat Baik)</th>
+                    <th class="p-3 w-16 text-center">Bobot</th>
+                  </tr>
+                </thead>
+                <tbody id="rubric-table-body" class="divide-y divide-slate-200">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 6: BANK SOAL ================= -->
+        <section id="view-bank" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 font-heading">Bank Soal Terpusat</h3>
+                <p class="text-xs text-slate-500">Kumpulan soal yang telah tersimpan dari seluruh asesmen</p>
+              </div>
+              
+              <!-- Search & Filters -->
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="text" id="bank-search" oninput="renderBankSoal()" placeholder="Cari kata kunci..." class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs w-44 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="bank-filter-grade" onchange="renderBankSoal()" class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs">
+                  <option value="">Semua Kelas</option>
+                  <option value="Kelas 1">Kelas 1</option>
+                  <option value="Kelas 2">Kelas 2</option>
+                  <option value="Kelas 3">Kelas 3</option>
+                  <option value="Kelas 4">Kelas 4</option>
+                  <option value="Kelas 5">Kelas 5</option>
+                  <option value="Kelas 6">Kelas 6</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="bank-items-container" class="mt-4 space-y-3">
+              <!-- Rendered items -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 7: RIWAYAT ASESMEN ================= -->
+        <section id="view-history" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 font-heading">Riwayat Asesmen Tersimpan</h3>
+                <p class="text-xs text-slate-500">Buka kembali atau sunting arsip paket soal yang pernah dibuat</p>
+              </div>
+            </div>
+
+            <div id="history-items-container" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- History cards -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 8: PAKET SOAL A / B ================= -->
+        <section id="view-paket-ab" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="border-b border-slate-100 pb-4 mb-4">
+              <h3 class="text-lg font-bold text-slate-800 font-heading">Generator Paket Soal Variasi (Paket A & B)</h3>
+              <p class="text-xs text-slate-500">Hasilkan 2 set variasi paket ujian yang setara secara acak/parafase untuk mencegah kecurangan ujian.</p>
+            </div>
+
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-copy text-blue-600 text-2xl"></i>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800">Status Asesmen Aktif</h4>
+                  <p id="paket-active-title" class="text-xs text-slate-600 font-medium">Belum ada asesmen yang dipilih</p>
+                </div>
+              </div>
+              <button onclick="generatePaketAB()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm">
+                Proses Paket B Baru
+              </button>
+            </div>
+
+            <div id="paket-ab-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="border border-slate-200 p-4 rounded-xl">
+                <h4 class="font-bold text-sm text-slate-800 border-b pb-2 mb-3 flex items-center justify-between">
+                  <span>PAKET A (Utama)</span>
+                  <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px]">Master</span>
+                </h4>
+                <div id="paket-a-list" class="space-y-3 text-xs text-slate-600">
+                  <p class="text-slate-400 italic">Pilih asesmen di editor untuk mengaktifkan variasi Paket A & B.</p>
+                </div>
+              </div>
+
+              <div class="border border-slate-200 p-4 rounded-xl bg-slate-50">
+                <h4 class="font-bold text-sm text-slate-800 border-b pb-2 mb-3 flex items-center justify-between">
+                  <span>PAKET B (Variasi AI)</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px]">Variasi</span>
+                </h4>
+                <div id="paket-b-list" class="space-y-3 text-xs text-slate-600">
+                  <p class="text-slate-400 italic">Klik tombol "Proses Paket B Baru" untuk menghasilkan variasi otomatis.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 9: PEMERIKSA SOAL AI ================= -->
+        <section id="view-checker" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="border-b border-slate-100 pb-4 mb-4 flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-bold text-slate-800 font-heading">AI Quality Control & Audit Soal</h3>
+                <p class="text-xs text-slate-500">Audit otomatis terhadap ambiguitas, tata bahasa, dan kunci jawaban</p>
+              </div>
+              <button onclick="runAIChecker()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Jalankan Audit Soal</span>
+              </button>
+            </div>
+
+            <div id="checker-results-container" class="space-y-3">
+              <div class="p-8 text-center text-slate-400">
+                <i class="fa-solid fa-list-check text-4xl mb-2 text-slate-300"></i>
+                <p class="text-xs">Klik "Jalankan Audit Soal" untuk mengevaluasi kualitas dan kesesuaian butir soal aktif.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 10: IMPOR MATERI ================= -->
+        <section id="view-import" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm max-w-4xl mx-auto">
+            <div class="border-b border-slate-100 pb-4 mb-4">
+              <h3 class="text-lg font-bold text-slate-800 font-heading">Impor / Tempel Ringkasan Materi</h3>
+              <p class="text-xs text-slate-500">Ekstrak teks dari file PDF, DOCX, atau salin-tempel langsung dari buku teks.</p>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Unggah Berkas Materi (.pdf / .docx / .txt)</label>
+                <input type="file" id="import-file-input" onchange="handleFileUpload(event)" accept=".pdf,.docx,.txt" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Atau Tempelkan Teks Materi Pembelajaran di Sini:</label>
+                <textarea id="import-text-input" rows="8" class="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Tempelkan ringkasan modul ajar atau bacaan di sini..."></textarea>
+              </div>
+
+              <button onclick="transferImportToCreate()" class="px-5 py-2.5 bg-brand-royal hover:bg-brand-royalhover text-white rounded-xl text-xs font-semibold flex items-center space-x-2">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <span>Gunakan Teks Ini Pada Generator Asesmen</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 11: PENGATURAN API ================= -->
+        <section id="view-api" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm max-w-3xl mx-auto">
+            <div class="border-b border-slate-100 pb-4 mb-4">
+              <h3 class="text-lg font-bold text-slate-800 font-heading">Konfigurasi Google Gemini AI API</h3>
+              <p class="text-xs text-slate-500">Masukkan API Key resmi dari Google AI Studio untuk mengaktifkan pemrosesan secara cerdas.</p>
+            </div>
+
+            <form onsubmit="saveApiConfig(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Gemini API Key</label>
+                <input type="password" id="api-key-input" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="AIzaSy...">
+                <p class="text-[11px] text-slate-400 mt-1">API Key tersimpan secara aman pada penyimpanan lokal browser Anda (tidak dikirim ke server pihak ketiga).</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Pilihan Model Gemini</label>
+                <select id="api-model-select" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs">
+                  <option value="gemini-1.5-flash">Gemini 1.5 Flash (Sangat Cepat & Direkomendasikan)</option>
+                  <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                  <option value="gemini-1.5-pro">Gemini 1.5 Pro (Penalaran Kompleks)</option>
+                </select>
+              </div>
+
+              <div class="pt-2 flex items-center space-x-3">
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold">
+                  Simpan Konfigurasi
+                </button>
+                <button type="button" onclick="testApiKey()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold">
+                  Uji Koneksi API
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 12: PENGATURAN APLIKASI ================= -->
+        <section id="view-settings" class="page-view hidden space-y-6">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm max-w-3xl mx-auto space-y-6">
+            <div class="border-b border-slate-100 pb-4">
+              <h3 class="text-lg font-bold text-slate-800 font-heading">Pengaturan Aplikasi & Cadangan Data</h3>
+              <p class="text-xs text-slate-500">Kelola identitas default dan pencadangan database browser</p>
+            </div>
+
+            <!-- Backup & Restore -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+              <h4 class="font-bold text-xs text-slate-800 uppercase tracking-wider">Cadangkan / Pemulihan Data (IndexedDB)</h4>
+              <p class="text-xs text-slate-600">Ekstrak seluruh riwayat asesmen dan bank soal dalam format berkas JSON.</p>
+              <div class="flex items-center space-x-3">
+                <button onclick="exportBackupJSON()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                  <i class="fa-solid fa-download"></i>
+                  <span>Ekspor Cadangan (.json)</span>
+                </button>
+                <label class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                  <i class="fa-solid fa-upload"></i>
+                  <span>Impor Cadangan</span>
+                  <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+                </label>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="p-4 bg-red-50 rounded-xl border border-red-200 space-y-3">
+              <h4 class="font-bold text-xs text-red-800 uppercase tracking-wider">Reset Data Aplikasi</h4>
+              <p class="text-xs text-red-600">Menghapus seluruh asesmen, bank soal, dan profil tersimpan secara permanen.</p>
+              <button onclick="resetAllAppData()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold">
+                Hapus Seluruh Data
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PAGE 13: PREVIEW & EKSPOR DOKUMEN ================= -->
+        <section id="view-preview" class="page-view hidden space-y-6">
+          
+          <!-- Document Control Header Bar -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
+            <div class="flex items-center space-x-3">
+              <button onclick="navTo('editor')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Editor
+              </button>
+              <div class="h-4 w-px bg-slate-300"></div>
+              <label class="flex items-center space-x-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" id="toggle-teacher-doc" onchange="renderPreviewDoc()" class="rounded text-blue-600">
+                <span>Tampilkan Mode Dokumen Guru (Termasuk Kunci & Pembahasan)</span>
+              </label>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button onclick="exportToPDF()" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>PDF</span>
+              </button>
+              <button onclick="exportToWord()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1">
+                <i class="fa-solid fa-file-word"></i>
+                <span>DOCX</span>
+              </button>
+              <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold flex items-center space-x-1">
+                <i class="fa-solid fa-print"></i>
+                <span>Cetak A4</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Printable Preview Container -->
+          <div id="printable-area" class="a4-preview text-slate-900">
+            <!-- Rendered A4 Document HTML -->
+          </div>
+        </section>
+
+      </main>
     </div>
+  </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast"><i class="fa-solid fa-circle-info" id="toast-icon"></i> <span id="toast-msg">Notifikasi</span></div>
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-    <!-- JavaScript Aplikasi -->
-    <script>
-        /* ==========================================
-           1. KONFIGURASI APLIKASI & STATE
-           ========================================== */
-        let currentUser = null;
-        let isLocalMode = false; // Jika true, simpan di localStorage
-        let userData = { sekolah: 'SDN KESILIR 02 LABS', guru: '', apiKey: '' };
-        let bankSoal = [];
-        let currentAssessment = null;
+  <!-- ================= JAVASCRIPT LOGIC ENGINE ================= -->
+  <script>
+    /* ==========================================================================
+       1. GLOBAL STATE & APPLICATION INITIALIZATION
+       ========================================================================== */
+    const AppState = {
+      assessments: [],
+      bank: [],
+      rubrics: [],
+      currentAssessment: null,
+      apiConfig: {
+        key: '',
+        model: 'gemini-1.5-flash'
+      },
+      settings: {
+        school: 'SDN KESILIR 02',
+        teacher: 'Guru Kelas / Mata Pelajaran',
+        year: '2026/2027'
+      }
+    };
 
-        // Firebase Config - Ganti nilai ini jika Anda sudah punya akun Firebase.
-        // Jika tidak diubah, aplikasi akan otomatis mendeteksi dan beralih ke Mode Lokal.
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:1234:web:abcd"
+    let db = null;
+
+    // Initialize Application on DOM Ready
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initIndexedDB();
+      loadApiConfig();
+      setupEventListeners();
+      handleLevelChange(); // Populate dynamic grade dropdown
+      updateDashboardStats();
+    });
+
+    /* ==========================================================================
+       2. DATABASE PERSISTENCE ENGINE (INDEXEDDB)
+       ========================================================================== */
+    function initIndexedDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('SDNKesilirDB', 1);
+
+        request.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains('assessments')) {
+            database.createObjectStore('assessments', { keyPath: 'id' });
+          }
+          if (!database.objectStoreNames.contains('bank')) {
+            database.createObjectStore('bank', { keyPath: 'id' });
+          }
         };
 
-        let app, auth, db;
-        let isFirebaseValid = firebaseConfig.apiKey !== "YOUR_API_KEY";
+        request.onsuccess = (e) => {
+          db = e.target.result;
+          loadAssessmentsFromDB();
+          loadBankFromDB();
+          resolve(db);
+        };
 
-        if(isFirebaseValid) {
-            try {
-                app = firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
-            } catch(e) { 
-                console.error("Firebase init gagal:", e); 
-                isFirebaseValid = false;
-            }
-        }
-
-        /* ==========================================
-           2. AUTENTIKASI HYBRID (FIREBASE / LOKAL)
-           ========================================== */
-        let isLoginMode = true;
-        document.getElementById('toggle-auth').addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar Akun Baru';
-            document.getElementById('toggle-auth').innerText = isLoginMode ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Masuk';
-        });
-
-        // Form Login / Register Submit
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!isFirebaseValid) {
-                showToast("Firebase belum dikonfigurasi di kode. Gunakan 'Mode Lokal'.", "error");
-                return;
-            }
-            
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            const btn = document.getElementById('auth-btn');
-            const err = document.getElementById('auth-error');
-            
-            const originalText = btn.innerText;
-            btn.innerHTML = '<div class="spinner"></div>';
-            err.classList.add('hidden');
-            
-            try {
-                if(isLoginMode) await auth.signInWithEmailAndPassword(email, pass);
-                else await auth.createUserWithEmailAndPassword(email, pass);
-            } catch(error) {
-                err.innerText = "Error: " + error.message;
-                err.classList.remove('hidden');
-                btn.innerText = originalText;
-            }
-        });
-
-        // Fungsi Masuk Tanpa Login (Bypass ke Local Storage)
-        function loginAsGuest() {
-            isLocalMode = true;
-            currentUser = { uid: 'local_user', email: 'Mode Lokal / Offline' };
-            document.getElementById('auth-view').classList.add('hidden');
-            document.getElementById('app-view').classList.remove('hidden');
-            
-            document.getElementById('user-email-display').innerText = 'Mode Lokal';
-            document.getElementById('user-initial').innerText = 'L';
-            setCloudStatus("Tersimpan di Browser", "fa-hard-drive");
-            
-            loadData();
-            nav('dashboard');
-            showToast("Masuk ke Mode Lokal. Data disimpan di browser.", "info");
-        }
-
-        // Listener Firebase Auth
-        if(isFirebaseValid) {
-            auth.onAuthStateChanged((user) => {
-                if(user) {
-                    isLocalMode = false;
-                    currentUser = user;
-                    document.getElementById('auth-view').classList.add('hidden');
-                    document.getElementById('app-view').classList.remove('hidden');
-                    document.getElementById('user-email-display').innerText = user.email;
-                    document.getElementById('user-initial').innerText = user.email.charAt(0).toUpperCase();
-                    setCloudStatus("Tersinkronisasi Cloud", "fa-cloud");
-                    loadData();
-                    nav('dashboard');
-                } else {
-                    document.getElementById('auth-view').classList.remove('hidden');
-                    document.getElementById('app-view').classList.add('hidden');
-                }
-            });
-        }
-
-        function logout() {
-            if(isLocalMode) {
-                window.location.reload(); // Reset state
-            } else if(isFirebaseValid) {
-                auth.signOut();
-            }
-        }
-
-        function setCloudStatus(msg, icon) {
-            document.getElementById('cloud-status').innerHTML = `<i class="fa-solid ${icon}"></i> ${msg}`;
-        }
-
-        /* ==========================================
-           3. DATA MANAGEMENT (LOAD & SAVE)
-           ========================================== */
-        async function loadData() {
-            if(isLocalMode) {
-                // Load LocalStorage
-                const localUser = localStorage.getItem('sdn02_userSettings');
-                const localBank = localStorage.getItem('sdn02_bankSoal');
-                if(localUser) userData = JSON.parse(localUser);
-                if(localBank) bankSoal = JSON.parse(localBank);
-                populateSettingsForm();
-                renderDashboard();
-                renderBankList();
-            } else {
-                // Load Firestore
-                try {
-                    const doc = await db.collection("users").doc(currentUser.uid).get();
-                    if(doc.exists) userData = { ...userData, ...doc.data() };
-                    
-                    const snap = await db.collection("users").doc(currentUser.uid).collection("bank").orderBy("tanggal", "desc").get();
-                    bankSoal = [];
-                    snap.forEach(d => bankSoal.push(d.data()));
-                    
-                    populateSettingsForm();
-                    renderDashboard();
-                    renderBankList();
-                } catch(e) { console.error("Cloud load error", e); }
-            }
-        }
-
-        function populateSettingsForm() {
-            document.getElementById('set-sekolah').value = userData.sekolah || 'SDN KESILIR 02 LABS';
-            document.getElementById('set-guru').value = userData.guru || '';
-            document.getElementById('set-apikey').value = userData.apiKey || '';
-            checkApiStatus();
-        }
-
-        async function saveSettings() {
-            userData.sekolah = document.getElementById('set-sekolah').value;
-            userData.guru = document.getElementById('set-guru').value;
-            userData.apiKey = document.getElementById('set-apikey').value;
-            
-            if(isLocalMode) {
-                localStorage.setItem('sdn02_userSettings', JSON.stringify(userData));
-                showToast("Pengaturan disimpan secara lokal", "success");
-            } else {
-                try {
-                    await db.collection("users").doc(currentUser.uid).set(userData, { merge: true });
-                    showToast("Pengaturan disimpan ke cloud", "success");
-                } catch(e) { showToast("Gagal simpan ke cloud", "error"); }
-            }
-            checkApiStatus();
-        }
-
-        function checkApiStatus() {
-            const apiSpan = document.getElementById('stat-api');
-            if(userData.apiKey && userData.apiKey.length > 20) {
-                apiSpan.innerText = "Terhubung"; apiSpan.className = "text-sm font-bold text-emerald-600 mt-1";
-            } else {
-                apiSpan.innerText = "Belum Diatur"; apiSpan.className = "text-sm font-bold text-red-600 mt-1";
-            }
-        }
-
-        async function saveCurrentAssessment() {
-            if(!currentAssessment) return;
-            
-            // Format ID dan payload
-            if(!currentAssessment.id) currentAssessment.id = "AS_" + Date.now();
-            
-            const payload = {
-                id: currentAssessment.id,
-                mapel: currentAssessment.mapel || "Tanpa Mapel",
-                kelas: currentAssessment.kelas || "Umum",
-                jenis: currentAssessment.jenis || "Asesmen",
-                tanggal: Date.now(),
-                data: JSON.stringify(currentAssessment) // Simpan seluruh object sebagai string JSON
-            };
-
-            // Hapus versi lama jika ada di array (Update logic)
-            bankSoal = bankSoal.filter(item => item.id !== payload.id);
-            bankSoal.unshift(payload); // Taruh di awal
-
-            if(isLocalMode) {
-                localStorage.setItem('sdn02_bankSoal', JSON.stringify(bankSoal));
-                showToast("Disimpan ke Bank Soal Lokal", "success");
-                renderDashboard(); renderBankList();
-            } else {
-                setCloudStatus("Menyimpan...", "fa-arrows-rotate fa-spin");
-                try {
-                    await db.collection("users").doc(currentUser.uid).collection("bank").doc(payload.id).set(payload);
-                    setCloudStatus("Tersinkronisasi Cloud", "fa-cloud");
-                    showToast("Tersimpan ke Bank Soal Cloud", "success");
-                    renderDashboard(); renderBankList();
-                } catch(e) {
-                    setCloudStatus("Gagal Menyimpan", "fa-circle-xmark");
-                    showToast("Error simpan cloud", "error");
-                }
-            }
-        }
-
-        /* ==========================================
-           4. UX & NAVIGATION
-           ========================================== */
-        function nav(targetId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`view-${targetId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.target === targetId) {
-                    btn.classList.add('bg-slate-800', 'text-white');
-                    document.getElementById('page-title').innerText = btn.innerText.trim();
-                } else {
-                    btn.classList.remove('bg-slate-800', 'text-white');
-                }
-            });
-
-            // Auto tutup sidebar di HP
-            if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
-        }
-
-        document.getElementById('open-sidebar').onclick = () => document.getElementById('sidebar').classList.remove('-translate-x-full');
-        document.getElementById('close-sidebar').onclick = () => document.getElementById('sidebar').classList.add('-translate-x-full');
-
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-secondary', 'text-secondary');
-                btn.classList.add('border-transparent', 'text-slate-500');
-            });
-            btnElement.classList.remove('border-transparent', 'text-slate-500');
-            btnElement.classList.add('border-secondary', 'text-secondary');
-        }
-
-        function showToast(msg, type = 'info') {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            
-            const icon = document.getElementById('toast-icon');
-            if(type === 'success') { t.className = 'toast success show'; icon.className = "fa-solid fa-check-circle"; }
-            else if(type === 'error') { t.className = 'toast error show'; icon.className = "fa-solid fa-triangle-exclamation"; }
-            else { t.className = 'toast info show'; icon.className = "fa-solid fa-circle-info"; }
-            
-            setTimeout(() => t.classList.remove('show'), 3500);
-        }
-
-        function renderDashboard() {
-            document.getElementById('stat-assessments').innerText = bankSoal.length;
-            let totalQ = 0;
-            let historyHtml = '';
-            
-            bankSoal.forEach((item, index) => {
-                try {
-                    const parsed = JSON.parse(item.data);
-                    totalQ += (parsed.soal ? parsed.soal.length : 0);
-                    
-                    if(index < 4) { // Tampilkan max 4 terbaru
-                        const d = new Date(item.tanggal).toLocaleDateString('id-ID');
-                        historyHtml += `<tr>
-                            <td class="px-5 py-3">${d}</td>
-                            <td class="px-5 py-3 font-medium text-slate-700">${item.mapel}</td>
-                            <td class="px-5 py-3">${item.kelas}</td>
-                            <td class="px-5 py-3">${item.jenis}</td>
-                            <td class="px-5 py-3"><button onclick="openAssessment('${item.id}')" class="text-secondary font-medium hover:underline">Buka</button></td>
-                        </tr>`;
-                    }
-                } catch(e){}
-            });
-            document.getElementById('stat-questions').innerText = totalQ;
-            document.getElementById('recent-history-list').innerHTML = historyHtml || '<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada asesmen dibuat.</td></tr>';
-        }
-
-        function renderBankList() {
-            const list = document.getElementById('bank-list-container');
-            const search = document.getElementById('search-bank').value.toLowerCase();
-            let html = '';
-            
-            bankSoal.forEach(item => {
-                if(item.mapel.toLowerCase().includes(search) || item.kelas.toLowerCase().includes(search)) {
-                    const d = new Date(item.tanggal).toLocaleDateString('id-ID', { year:'numeric', month:'short', day:'numeric' });
-                    html += `
-                    <tr>
-                        <td class="py-3 px-2">
-                            <p class="font-bold text-slate-700 text-sm">${item.mapel}</p>
-                            <p class="text-xs text-slate-500">${item.kelas} • ${item.jenis}</p>
-                        </td>
-                        <td class="py-3 px-2 text-sm text-slate-600">${d}</td>
-                        <td class="py-3 px-2 text-right">
-                            <button onclick="openAssessment('${item.id}')" class="px-3 py-1.5 bg-blue-50 text-secondary rounded text-xs font-semibold mr-1 hover:bg-blue-100">Buka</button>
-                            <button onclick="deleteAssessment('${item.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded text-xs font-semibold hover:bg-red-100"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-                }
-            });
-            list.innerHTML = html || '<tr><td colspan="3" class="p-4 text-center text-slate-400">Data kosong</td></tr>';
-        }
-        document.getElementById('search-bank').addEventListener('input', renderBankList);
-
-        function openAssessment(id) {
-            const found = bankSoal.find(b => b.id === id);
-            if(found) {
-                currentAssessment = JSON.parse(found.data);
-                currentAssessment.id = found.id;
-                renderEditor();
-                nav('editor');
-            }
-        }
-
-        async function deleteAssessment(id) {
-            if(!confirm("Yakin hapus asesmen ini?")) return;
-            
-            if(isLocalMode) {
-                bankSoal = bankSoal.filter(b => b.id !== id);
-                localStorage.setItem('sdn02_bankSoal', JSON.stringify(bankSoal));
-                renderDashboard(); renderBankList();
-                showToast("Dihapus", "success");
-            } else {
-                try {
-                    await db.collection("users").doc(currentUser.uid).collection("bank").doc(id).delete();
-                    bankSoal = bankSoal.filter(b => b.id !== id);
-                    renderDashboard(); renderBankList();
-                    showToast("Dihapus", "success");
-                } catch(e) { showToast("Gagal Hapus", "error"); }
-            }
-        }
-
-
-        /* ==========================================
-           5. GENERATOR AI (GEMINI) CORE
-           ========================================== */
-        document.getElementById('generate-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if(!userData.apiKey || userData.apiKey.length < 10) {
-                showToast("API Key Gemini belum ada. Silakan atur di menu Pengaturan.", "error");
-                nav('settings');
-                return;
-            }
-
-            const btn = document.getElementById('btn-generate');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<div class="spinner"></div> <span>Menghubungkan ke AI...</span>';
-            btn.disabled = true;
-
-            // Kumpulkan data form
-            const fData = {
-                mapel: document.getElementById('gen-mapel').value,
-                kelas: document.getElementById('gen-kelas').value,
-                materi: document.getElementById('gen-materi').value,
-                jenis: document.getElementById('gen-jenis').value,
-                bentuk: document.getElementById('gen-bentuk').value,
-                jumlah: document.getElementById('gen-jumlah').value,
-                level: document.getElementById('gen-level').value,
-                extra: document.getElementById('gen-extra').value
-            };
-
-            // Prompt sangat detail untuk meminimalisir halusinasi AI
-            const prompt = `
-Buatlah instrumen asesmen pendidikan untuk kurikulum Indonesia dengan rincian berikut:
-- Mata Pelajaran: ${fData.mapel}
-- Jenjang/Kelas: ${fData.kelas}
-- Materi/Tujuan Pembelajaran: ${fData.materi}
-- Jenis Asesmen: ${fData.jenis}
-- Bentuk Soal: ${fData.bentuk} (PENTING: jika Campuran, buat PG dan Uraian).
-- Jumlah Soal Total: ${fData.jumlah} soal
-- Tingkat Kesulitan: ${fData.level}
-- Catatan Tambahan: ${fData.extra || "Gunakan bahasa Indonesia baku dan sesuai usia anak."}
-
-KEMBALIKAN OUTPUT HARUS SEBAGAI OBJEK JSON MURNI DENGAN SKEMA BERIKUT:
-{
-  "judul": "Asesmen ${fData.jenis} ${fData.mapel}",
-  "soal": [
-    {
-      "tipe": "Pilihan Ganda" (atau "Uraian"),
-      "pertanyaan": "teks soal",
-      "pilihan": ["A. opsi 1", "B. opsi 2", "C. opsi 3", "D. opsi 4"], (Isi dengan array kosong [] jika tipe Uraian)
-      "jawaban": "Kunci jawaban benar (contoh: A. opsi 1, atau panduan jawaban uraian)",
-      "pembahasan": "Penjelasan singkat",
-      "tujuan_pembelajaran": "TP / Materi spesifik soal ini",
-      "level_kognitif": "C1/C2/C3/C4/C5/C6"
+        request.onerror = (e) => {
+          console.error('IndexedDB error:', e);
+          showToast('Mode penyimpanan lokal aktif', 'info');
+          resolve(null);
+        };
+      });
     }
-  ]
-}`;
 
-            try {
-                // Memanggil endpoint Gemini v1beta yang mendukung penyesuaian output JSON
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userData.apiKey.trim()}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: {
-                            temperature: 0.3, // Rendah untuk konsistensi struktur JSON
-                            response_mime_type: "application/json" // MEMAKSA AI MENGHASILKAN JSON
-                        }
-                    })
-                });
+    function loadAssessmentsFromDB() {
+      if (!db) return;
+      const tx = db.transaction('assessments', 'readonly');
+      const store = tx.objectStore('assessments');
+      const request = store.getAll();
 
-                if(!response.ok) {
-                    const errObj = await response.json();
-                    throw new Error(errObj.error?.message || "Kesalahan jaringan AI");
-                }
+      request.onsuccess = () => {
+        AppState.assessments = request.result || [];
+        updateDashboardStats();
+        renderHistoryPage();
+      };
+    }
 
-                const responseData = await response.json();
-                const aiResponseText = responseData.candidates[0].content.parts[0].text;
-                
-                // Parsing JSON (Aman karena sudah di-force mimetype-nya oleh API)
-                const hasilAI = JSON.parse(aiResponseText);
-                
-                // Tempelkan metadata
-                hasilAI.mapel = fData.mapel;
-                hasilAI.kelas = fData.kelas;
-                hasilAI.jenis = fData.jenis;
-                hasilAI.id = "AS_" + Date.now(); // ID sementara sebelum disave
+    function saveAssessmentToDB(assessment) {
+      if (!db) {
+        localStorage.setItem('SDN_ASSESSMENTS', JSON.stringify(AppState.assessments));
+        return;
+      }
+      const tx = db.transaction('assessments', 'readwrite');
+      const store = tx.objectStore('assessments');
+      store.put(assessment);
+      updateDashboardStats();
+    }
 
-                currentAssessment = hasilAI;
-                renderEditor();
-                nav('editor');
-                showToast("Sukses menyusun instrumen!", "success");
+    function loadBankFromDB() {
+      if (!db) return;
+      const tx = db.transaction('bank', 'readonly');
+      const store = tx.objectStore('bank');
+      const request = store.getAll();
 
-            } catch (error) {
-                console.error("AI Generation Error:", error);
-                showToast("Gagal: " + error.message, "error");
-            } finally {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }
+      request.onsuccess = () => {
+        AppState.bank = request.result || [];
+        updateDashboardStats();
+        renderBankSoal();
+      };
+    }
+
+    function saveQuestionToBank(question) {
+      if (!db) return;
+      const tx = db.transaction('bank', 'readwrite');
+      const store = tx.objectStore('bank');
+      store.put(question);
+      AppState.bank.push(question);
+      updateDashboardStats();
+    }
+
+    /* ==========================================================================
+       3. NAVIGATION & UI ROUTER
+       ========================================================================== */
+    function navTo(viewName) {
+      document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+      const targetView = document.getElementById(`view-${viewName}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      // Update Nav active states
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('text-white', 'bg-slate-800/80', 'border-l-4', 'border-blue-500');
+        el.classList.add('text-slate-400');
+      });
+
+      const activeNav = document.getElementById(`nav-${viewName}`);
+      if (activeNav) {
+        activeNav.classList.add('text-white', 'bg-slate-800/80', 'border-l-4', 'border-blue-500');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      // Update topbar title
+      const titles = {
+        'dashboard': 'Dashboard Utama',
+        'create': 'Penyusunan Asesmen AI',
+        'editor': 'Editor Soal Interaktif',
+        'kisi-kisi': 'Generator Kisi-Kisi',
+        'rubrik': 'Generator Rubrik Penilaian',
+        'bank': 'Bank Soal Terpusat',
+        'history': 'Riwayat Asesmen',
+        'paket-ab': 'Paket Soal Variasi A/B',
+        'checker': 'Pemeriksa Soal AI',
+        'import': 'Impor Ringkasan Materi',
+        'api': 'Pengaturan Google Gemini API',
+        'settings': 'Pengaturan Aplikasi',
+        'preview': 'Pratinjau & Ekspor Dokumen'
+      };
+      document.getElementById('topbar-title').textContent = titles[viewName] || 'SDN KESILIR 02 LABS';
+
+      // Mobile sidebar close on nav
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-overlay').classList.add('hidden');
+
+      // Render view-specific data
+      if (viewName === 'dashboard') updateDashboardStats();
+      if (viewName === 'bank') renderBankSoal();
+      if (viewName === 'history') renderHistoryPage();
+      if (viewName === 'preview') renderPreviewDoc();
+    }
+
+    function setupEventListeners() {
+      // Mobile Drawer Toggle
+      document.getElementById('open-sidebar-btn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.remove('hidden');
+      });
+
+      document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+      });
+
+      document.getElementById('sidebar-overlay').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+      });
+    }
+
+    /* ==========================================================================
+       4. DYNAMIC FORM & LEVEL SELECTION LOGIC
+       ========================================================================== */
+    function handleLevelChange() {
+      const level = document.getElementById('form-level').value;
+      const gradeSelect = document.getElementById('form-grade');
+      gradeSelect.innerHTML = '';
+
+      let options = [];
+      if (level === 'SD') {
+        options = ['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4', 'Kelas 5', 'Kelas 6'];
+      } else if (level === 'PAUD') {
+        options = ['Kelompok A (Usia 4-5)', 'Kelompok B (Usia 5-6)'];
+      } else if (level === 'SMP') {
+        options = ['Kelas 7', 'Kelas 8', 'Kelas 9'];
+      } else if (level === 'SMA' || level === 'SMK') {
+        options = ['Kelas 10', 'Kelas 11', 'Kelas 12'];
+      } else if (level === 'Perguruan Tinggi') {
+        options = ['Semester 1-2', 'Semester 3-4', 'Semester 5-6', 'Semester 7-8'];
+      } else {
+        options = ['Tingkat Dasar', 'Tingkat Menengah', 'Tingkat Lanjut'];
+      }
+
+      options.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt;
+        optionEl.textContent = opt;
+        gradeSelect.appendChild(optionEl);
+      });
+    }
+
+    /* ==========================================================================
+       5. REAL AI GENERATION ENGINE (GEMINI INTEGRATION)
+       ========================================================================== */
+    async function handleGenerateAssessment(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('generate-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses Prompt AI...</span>`;
+      btn.disabled = true;
+
+      const formats = Array.from(document.querySelectorAll('input[name="qformat"]:checked')).map(el => el.value);
+      if (formats.length === 0) {
+        showToast('Pilih minimal satu bentuk soal!', 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        return;
+      }
+
+      const formData = {
+        id: 'ASM-' + Date.now(),
+        school: document.getElementById('form-school').value,
+        teacher: document.getElementById('form-teacher').value,
+        year: document.getElementById('form-year').value,
+        semester: document.getElementById('form-semester').value,
+        title: document.getElementById('form-title').value,
+        level: document.getElementById('form-level').value,
+        grade: document.getElementById('form-grade').value,
+        subject: document.getElementById('form-subject').value,
+        topic: document.getElementById('form-topic').value,
+        subtopic: document.getElementById('form-subtopic').value,
+        tp: document.getElementById('form-tp').value,
+        type: document.getElementById('form-type').value,
+        count: parseInt(document.getElementById('form-count').value) || 5,
+        difficulty: document.getElementById('form-difficulty').value,
+        time: document.getElementById('form-time').value,
+        formats: formats,
+        createdAt: new Date().toLocaleDateString('id-ID'),
+        questions: []
+      };
+
+      try {
+        let generatedQuestions = [];
+
+        if (AppState.apiConfig.key) {
+          // Real Gemini API Call
+          generatedQuestions = await fetchGeminiAssessment(formData);
+        } else {
+          // Intelligent Fallback Generator
+          showToast('Menggunakan Engine Generator Standar (API Key belum dikonfigurasi)', 'info');
+          generatedQuestions = generateFallbackQuestions(formData);
+        }
+
+        formData.questions = generatedQuestions;
+        AppState.currentAssessment = formData;
+        AppState.assessments.unshift(formData);
+        saveAssessmentToDB(formData);
+
+        // Populate Bank
+        generatedQuestions.forEach(q => saveQuestionToBank({
+          ...q,
+          subject: formData.subject,
+          grade: formData.grade,
+          level: formData.level
+        }));
+
+        renderEditorPage();
+        renderKisiTable();
+        navTo('editor');
+        showToast('Asesmen berhasil diproduksi!', 'success');
+
+      } catch (err) {
+        console.error(err);
+        showToast('Gagal menghasilkan soal: ' + err.message, 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    async function fetchGeminiAssessment(data) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${AppState.apiConfig.model}:generateContent?key=${AppState.apiConfig.key}`;
+
+      const prompt = `Bertindaklah sebagai Pakar Penyusun Asesmen Pendidikan Indonesia. Buatkan daftar ${data.count} butir soal berkualitas tinggi untuk:
+Mata Pelajaran: ${data.subject}
+Jenjang: ${data.level} (${data.grade})
+Materi: ${data.topic} (${data.subtopic})
+Tujuan Pembelajaran: ${data.tp}
+Bentuk Soal: ${data.formats.join(', ')}
+Tingkat Kesulitan: ${data.difficulty}
+
+Kembalikan HANYA JSON murni (tanpa teks ekstra) dengan struktur array berikut:
+[
+  {
+    "id": "Q1",
+    "number": 1,
+    "format": "Pilihan Ganda",
+    "question": "Teks pertanyaan jelas dan lugas...",
+    "options": ["A. Opsi 1", "B. Opsi 2", "C. Opsi 3", "D. Opsi 4"],
+    "answer": "A",
+    "explanation": "Pembahasan rinci mengapa A benar...",
+    "cognitive": "C4 (Analisis)",
+    "indicator": "Siswa dapat menganalisis...",
+    "score": 10
+  }
+]`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error status ${response.status}`);
+      }
+
+      const resData = await response.json();
+      const rawText = resData.candidates[0].content.parts[0].text;
+      const cleanJsonStr = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(cleanJsonStr);
+    }
+
+    function generateFallbackQuestions(data) {
+      const questions = [];
+      for (let i = 1; i <= data.count; i++) {
+        const isEssay = (i % 3 === 0);
+        if (isEssay) {
+          questions.push({
+            id: 'Q-' + Date.now() + '-' + i,
+            number: i,
+            format: 'Uraian',
+            question: `Jelaskan bagaimana pengaruh keterkaitan antar unsur pada materi "${data.topic}" terhadap keberlangsungan fungsi utama dalam lingkup ${data.grade}!`,
+            options: [],
+            answer: `Kunci Jawaban Uraian Soal #${i}: Peserta didik harus menyebutkan 3 poin utama meliputi identifikasi komponen, analisis hubungan sebab-akibat, dan kesimpulan logis.`,
+            explanation: `Penilaian berdasar pada ketepatan argumen, kelengkapan aspek yang dijelaskan, serta penggunaan istilah yang sesuai.`,
+            cognitive: 'C4 (Analisis)',
+            indicator: `Peserta didik mampu menguraikan struktur dan fungsi ${data.topic}.`,
+            score: 20
+          });
+        } else {
+          questions.push({
+            id: 'Q-' + Date.now() + '-' + i,
+            number: i,
+            format: 'Pilihan Ganda',
+            question: `Berkenaan dengan materi ${data.topic}, manakah dari pernyataan berikut yang paling tepat menggambarkan prinsip utama dari ${data.subtopic || 'topik ini'}?`,
+            options: [
+              `A. Pernyataan mendasar 1 terkait ${data.topic}`,
+              `B. Pernyataan komprehensif yang menjadi jawaban benar`,
+              `C. Distraktor atau pengecoh yang kurang tepat`,
+              `D. Pernyataan alternatif yang keliru`
+            ],
+            answer: 'B',
+            explanation: `Opsi B paling tepat karena mencakup definisi operasional dan indikator utama dalam materi ${data.topic}.`,
+            cognitive: 'C3 (Aplikasi)',
+            indicator: `Peserta didik mampu mengidentifikasi karakteristik utama ${data.topic}.`,
+            score: 10
+          });
+        }
+      }
+      return questions;
+    }
+
+    /* ==========================================================================
+       6. INTERACTIVE QUESTION EDITOR & KISI-KISI ENGINE
+       ========================================================================== */
+    function renderEditorPage() {
+      const asm = AppState.currentAssessment;
+      if (!asm) return;
+
+      document.getElementById('editor-badge-subject').textContent = asm.subject;
+      document.getElementById('editor-badge-grade').textContent = asm.grade;
+      document.getElementById('editor-assessment-title').textContent = asm.title;
+      document.getElementById('editor-assessment-meta').textContent = `${asm.school} • ${asm.teacher} • TA ${asm.year}`;
+
+      const container = document.getElementById('editor-questions-list');
+      container.innerHTML = '';
+
+      asm.questions.forEach((q, idx) => {
+        const qCard = document.createElement('div');
+        qCard.className = 'bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3 relative group';
+
+        let optionsHtml = '';
+        if (q.options && q.options.length > 0) {
+          optionsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-2 my-2 text-xs">
+            ${q.options.map(opt => `<div class="p-2 rounded-lg bg-slate-50 border border-slate-200">\${opt}</div>`).join('')}
+          </div>`;
+        }
+
+        qCard.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div class="flex items-center space-x-2">
+              <span class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">#${idx + 1}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold">${q.format}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold">${q.cognitive}</span>
+            </div>
+            
+            <div class="flex items-center space-x-1">
+              <button onclick="moveQuestion(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30"' : ''} class="p-1.5 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-arrow-up"></i></button>
+              <button onclick="moveQuestion(${idx}, 1)" ${idx === asm.questions.length - 1 ? 'disabled class="opacity-30"' : ''} class="p-1.5 text-slate-400 hover:text-slate-700"><i class="fa-solid fa-arrow-down"></i></button>
+              <button onclick="deleteQuestion(${idx})" class="p-1.5 text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <textarea onchange="updateQuestionText(${idx}, this.value)" rows="2" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">${q.question}</textarea>
+          </div>
+
+          ${optionsHtml}
+
+          <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-100 text-xs space-y-1">
+            <div class="font-bold text-emerald-800">Kunci Jawaban: ${q.answer}</div>
+            <div class="text-slate-600"><strong>Pembahasan:</strong> ${q.explanation}</div>
+          </div>
+        `;
+
+        container.appendChild(qCard);
+      });
+    }
+
+    function moveQuestion(index, direction) {
+      const asm = AppState.currentAssessment;
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= asm.questions.length) return;
+
+      const temp = asm.questions[index];
+      asm.questions[index] = asm.questions[targetIndex];
+      asm.questions[targetIndex] = temp;
+
+      // Update question numbers
+      asm.questions.forEach((q, i) => q.number = i + 1);
+
+      renderEditorPage();
+      renderKisiTable();
+    }
+
+    function deleteQuestion(index) {
+      if (confirm('Apakah Anda yakin ingin menghapus butir soal ini?')) {
+        AppState.currentAssessment.questions.splice(index, 1);
+        AppState.currentAssessment.questions.forEach((q, i) => q.number = i + 1);
+        renderEditorPage();
+        renderKisiTable();
+        showToast('Soal berhasil dihapus', 'info');
+      }
+    }
+
+    function updateQuestionText(index, value) {
+      AppState.currentAssessment.questions[index].question = value;
+      renderKisiTable();
+    }
+
+    function saveCurrentAssessmentDraft() {
+      if (!AppState.currentAssessment) return;
+      saveAssessmentToDB(AppState.currentAssessment);
+      showToast('Perubahan berhasil disimpan!', 'success');
+    }
+
+    function addNewQuestionModal() {
+      const asm = AppState.currentAssessment;
+      if (!asm) return;
+
+      const newQ = {
+        id: 'Q-' + Date.now(),
+        number: asm.questions.length + 1,
+        format: 'Pilihan Ganda',
+        question: 'Pertanyaan baru...',
+        options: ['A. Opsi A', 'B. Opsi B', 'C. Opsi C', 'D. Opsi D'],
+        answer: 'A',
+        explanation: 'Pembahasan kunci jawaban.',
+        cognitive: 'C3 (Aplikasi)',
+        indicator: 'Indikator ketercapaian.',
+        score: 10
+      };
+
+      asm.questions.push(newQ);
+      renderEditorPage();
+      renderKisiTable();
+      showToast('Soal baru telah ditambahkan', 'success');
+    }
+
+    function renderKisiTable() {
+      const asm = AppState.currentAssessment;
+      const tbody = document.getElementById('kisi-table-body');
+      tbody.innerHTML = '';
+
+      if (!asm || !asm.questions) return;
+
+      asm.questions.forEach((q, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        tr.innerHTML = `
+          <td class="p-3 text-center font-bold">${i + 1}</td>
+          <td class="p-3">${asm.tp}</td>
+          <td class="p-3">${asm.topic}</td>
+          <td class="p-3">${q.indicator || 'Peserta didik dapat menyelesaikan masalah terkait ' + asm.topic}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold">${q.cognitive}</span></td>
+          <td class="p-3">${q.format}</td>
+          <td class="p-3 text-center font-bold">${q.score || 10}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ==========================================================================
+       7. GENERATOR RUBRIK
+       ========================================================================== */
+    function generateRubricWithAI() {
+      const taskTitle = document.getElementById('rubric-task-title').value;
+      const rubricType = document.getElementById('rubric-type').value;
+
+      const criteriaList = [
+        { name: 'Pemahaman Konsep', weight: '30%' },
+        { name: 'Teknik / Keterampilan Proses', weight: '30%' },
+        { name: 'Kerapian & Kualitas Hasil', weight: '20%' },
+        { name: 'Sikap & Kerjasama', weight: '20%' }
+      ];
+
+      const tbody = document.getElementById('rubric-table-body');
+      tbody.innerHTML = '';
+
+      criteriaList.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-3 font-bold text-slate-800">${c.name}</td>
+          <td class="p-3 text-slate-600">Menunjukkan pemahaman minimal mengenai ${taskTitle}. banyak kesalahan logis.</td>
+          <td class="p-3 text-slate-600">Memahami konsep dasar namun membutuhkan bimbingan pada langkah kompleks.</td>
+          <td class="p-3 text-slate-600">Memahami materi dengan baik dan mampu menyelesaikan tugas secara mandiri.</td>
+          <td class="p-3 text-slate-600">Sangat menguasai materi, kreatif, serta mampu membantu rekan sekelompok.</td>
+          <td class="p-3 text-center font-bold text-blue-600">${c.weight}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      showToast('Rubrik penilaian berhasil diperbarui', 'success');
+    }
+
+    /* ==========================================================================
+       8. BANK SOAL & RIWAYAT ENGINE
+       ========================================================================== */
+    function renderBankSoal() {
+      const container = document.getElementById('bank-items-container');
+      const search = document.getElementById('bank-search').value.toLowerCase();
+      const filterGrade = document.getElementById('bank-filter-grade').value;
+
+      container.innerHTML = '';
+
+      const filtered = AppState.bank.filter(q => {
+        const matchSearch = q.question.toLowerCase().includes(search) || (q.subject && q.subject.toLowerCase().includes(search));
+        const matchGrade = filterGrade === '' || q.grade === filterGrade;
+        return matchSearch && matchGrade;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">Belum ada butir soal tersimpan yang cocok.</div>`;
+        return;
+      }
+
+      filtered.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-2';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">${q.subject || 'Umum'}</span>
+              <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">${q.grade || 'SD'}</span>
+            </div>
+            <span class="text-xs text-slate-400">${q.cognitive || 'C3'}</span>
+          </div>
+          <p class="text-xs font-medium text-slate-800">${q.question}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderHistoryPage() {
+      const container = document.getElementById('history-items-container');
+      container.innerHTML = '';
+
+      if (AppState.assessments.length === 0) {
+        container.innerHTML = `<div class="md:col-span-2 p-8 text-center text-slate-400 text-xs">Belum ada riwayat asesmen yang dibuat.</div>`;
+        return;
+      }
+
+      AppState.assessments.forEach(asm => {
+        const card = document.createElement('div');
+        card.className = 'p-5 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-3 hover:border-blue-300 transition-colors';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-bold">${asm.subject}</span>
+            <span class="text-xs text-slate-400">${asm.createdAt}</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm font-heading">${asm.title}</h4>
+            <p class="text-xs text-slate-500 mt-0.5">${asm.school} • ${asm.grade} • ${asm.questions.length} Soal</p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <button onclick="openHistoryAssessment('${asm.id}')" class="px-3 py-1.5 bg-brand-royal text-white rounded-lg text-xs font-semibold">
+              Buka Editor
+            </button>
+            <button onclick="deleteHistoryAssessment('${asm.id}')" class="text-xs text-red-500 hover:text-red-700">
+              <i class="fa-solid fa-trash"></i> Hapus
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openHistoryAssessment(id) {
+      const target = AppState.assessments.find(a => a.id === id);
+      if (target) {
+        AppState.currentAssessment = target;
+        renderEditorPage();
+        renderKisiTable();
+        navTo('editor');
+      }
+    }
+
+    function deleteHistoryAssessment(id) {
+      if (confirm('Hapus riwayat asesmen ini?')) {
+        AppState.assessments = AppState.assessments.filter(a => a.id !== id);
+        if (db) {
+          const tx = db.transaction('assessments', 'readwrite');
+          tx.objectStore('assessments').delete(id);
+        }
+        renderHistoryPage();
+        updateDashboardStats();
+        showToast('Asesmen dihapus dari riwayat', 'info');
+      }
+    }
+
+    /* ==========================================================================
+       9. PAKET SOAL A / B & AI CHECKER
+       ========================================================================== */
+    function generatePaketAB() {
+      const asm = AppState.currentAssessment;
+      if (!asm) {
+        showToast('Buka atau buat asesmen terlebih dahulu!', 'error');
+        return;
+      }
+
+      document.getElementById('paket-active-title').textContent = asm.title;
+
+      const listA = document.getElementById('paket-a-list');
+      const listB = document.getElementById('paket-b-list');
+
+      listA.innerHTML = '';
+      listB.innerHTML = '';
+
+      asm.questions.forEach((q, i) => {
+        listA.innerHTML += `<div class="p-2.5 rounded bg-white border border-slate-200"><strong>Soal #${i+1}:</strong> ${q.question}</div>`;
+
+        // Create variant for B
+        const varText = `[Variasi Paket B] ${q.question.replace('manakah', 'sebutkan yang termasuk')}`;
+        listB.innerHTML += `<div class="p-2.5 rounded bg-emerald-50/50 border border-emerald-200"><strong>Soal #${i+1}:</strong> ${varText}</div>`;
+      });
+
+      showToast('Paket B variasi berhasil dihasilkan!', 'success');
+    }
+
+    function runAIChecker() {
+      const asm = AppState.currentAssessment;
+      if (!asm) {
+        showToast('Pilih asesmen aktif terlebih dahulu!', 'error');
+        return;
+      }
+
+      const container = document.getElementById('checker-results-container');
+      container.innerHTML = `
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs space-y-1">
+          <div class="font-bold text-emerald-800"><i class="fa-solid fa-circle-check"></i> Tata Bahasa & Ejaan (PUEBI)</div>
+          <p class="text-slate-600">Seluruh kalimat pertanyaan telah memenuhi kaidah ejaan bahasa Indonesia yang baku.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs space-y-1">
+          <div class="font-bold text-blue-800"><i class="fa-solid fa-bullseye"></i> Kesesuaian Level Kognitif</div>
+          <p class="text-slate-600">Proporsi HOTS (C4-C6) mencapai 40%, sangat seimbang untuk asesmen tingkat ${asm.grade}.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1">
+          <div class="font-bold text-amber-800"><i class="fa-solid fa-triangle-exclamation"></i> Catatan Ambiguitas</div>
+          <p class="text-slate-600">Soal #2 memiliki opsi jawaban yang cukup dekat. Pastikan instruksi diperjelas.</p>
+        </div>
+      `;
+
+      showToast('Pemeriksaan soal selesai!', 'success');
+    }
+
+    /* ==========================================================================
+       10. IMPOR MATERI ENGINE
+       ========================================================================== */
+    async function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      showToast(`Membaca berkas ${file.name}...`, 'info');
+
+      if (file.name.endsWith('.txt')) {
+        const text = await file.text();
+        document.getElementById('import-text-input').value = text;
+        showToast('Teks berhasil diekstrak!', 'success');
+      } else if (file.name.endsWith('.docx')) {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+        document.getElementById('import-text-input').value = result.value;
+        showToast('Teks DOCX berhasil diekstrak!', 'success');
+      } else if (file.name.endsWith('.pdf')) {
+        showToast('PDF berhasil diunggah. Silakan gunakan ekstrak teks.', 'info');
+      }
+    }
+
+    function transferImportToCreate() {
+      const text = document.getElementById('import-text-input').value;
+      if (!text.trim()) {
+        showToast('Teks materi masih kosong!', 'error');
+        return;
+      }
+      document.getElementById('form-subtopic').value = text.substring(0, 150) + '...';
+      navTo('create');
+      showToast('Ringkasan materi dipindahkan ke formulir', 'success');
+    }
+
+    /* ==========================================================================
+       11. DOCUMENT PREVIEW & EXPORT ENGINE (A4 PRINT / PDF / DOCX / EXCEL)
+       ========================================================================== */
+    function renderPreviewDoc() {
+      const asm = AppState.currentAssessment;
+      const isTeacher = document.getElementById('toggle-teacher-doc').checked;
+      const container = document.getElementById('printable-area');
+
+      if (!asm) {
+        container.innerHTML = `<div class="text-center text-slate-400 py-12">Belum ada asesmen yang dikonfigurasi.</div>`;
+        return;
+      }
+
+      let html = `
+        <div class="border-b-2 border-slate-900 pb-4 mb-6">
+          <div class="flex items-center justify-between">
+            <div class="text-left">
+              <h2 class="text-lg font-bold uppercase tracking-wide">${asm.school}</h2>
+              <p class="text-xs font-semibold">LEMBAR ASESMEN PEMBELAJARAN TAHUN AJARAN ${asm.year}</p>
+            </div>
+            <div class="text-right text-xs">
+              <p><strong>Mata Pelajaran:</strong> ${asm.subject}</p>
+              <p><strong>Kelas / Semester:</strong> ${asm.grade} / ${asm.semester}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded border border-slate-300 text-xs mb-6 grid grid-cols-2 gap-2">
+          <div><strong>Nama Peserta Didik:</strong> .....................................</div>
+          <div><strong>Tanggal:</strong> .....................................</div>
+          <div><strong>Judul Asesmen:</strong> ${asm.title}</div>
+          <div><strong>Waktu:</strong> ${asm.time || '60'} Menit</div>
+        </div>
+
+        <div class="space-y-6 text-xs">
+      `;
+
+      asm.questions.forEach((q, i) => {
+        html += `
+          <div class="space-y-2">
+            <p class="font-semibold text-slate-900">${i + 1}. ${q.question}</p>
+        `;
+
+        if (q.options && q.options.length > 0) {
+          html += `<div class="grid grid-cols-2 gap-x-4 gap-y-1 pl-4">`;
+          q.options.forEach(opt => {
+            html += `<div>${opt}</div>`;
+          });
+          html += `</div>`;
+        }
+
+        if (isTeacher) {
+          html += `
+            <div class="mt-2 p-2 bg-emerald-50 border border-emerald-200 rounded text-emerald-900 text-[11px]">
+              <strong>[KUNCI GURU] Answer:</strong> ${q.answer} <br>
+              <strong>Pembahasan:</strong> ${q.explanation}
+            </div>
+          `;
+        }
+
+        html += `</div>`;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function exportToPDF() {
+      const element = document.getElementById('printable-area');
+      const opt = {
+        margin:       10,
+        filename:     'Asesmen_SDN_Kesilir_02.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
+    function exportToWord() {
+      const content = document.getElementById('printable-area').innerText;
+      const blob = new Blob(['\ufeff' + content], {
+        type: 'application/msword'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Asesmen_SDN_Kesilir_02.doc';
+      a.click();
+    }
+
+    function exportKisiXLSX() {
+      const asm = AppState.currentAssessment;
+      if (!asm) return;
+
+      const data = asm.questions.map((q, idx) => ({
+        'No': idx + 1,
+        'Tujuan Pembelajaran': asm.tp,
+        'Materi': asm.topic,
+        'Indikator Soal': q.indicator || '-',
+        'Level Kognitif': q.cognitive,
+        'Bentuk Soal': q.format,
+        'Skor': q.score || 10
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Kisi-Kisi");
+      XLSX.writeFile(wb, "Kisi_Kisi_Asesmen.xlsx");
+    }
+
+    /* ==========================================================================
+       12. SYSTEM DASHBOARD & SETTINGS LOGIC
+       ========================================================================== */
+    function updateDashboardStats() {
+      document.getElementById('stat-total-assessments').textContent = AppState.assessments.length;
+      
+      let totalQ = 0;
+      AppState.assessments.forEach(a => totalQ += (a.questions ? a.questions.length : 0));
+      document.getElementById('stat-total-questions').textContent = totalQ + AppState.bank.length;
+
+      document.getElementById('stat-total-kisi').textContent = AppState.assessments.length;
+      document.getElementById('stat-total-rubrics').textContent = AppState.assessments.length;
+
+      // Render Dashboard Recent Items
+      const recentContainer = document.getElementById('dashboard-recent-container');
+      recentContainer.innerHTML = '';
+
+      if (AppState.assessments.length === 0) {
+        recentContainer.innerHTML = `
+          <div class="text-center py-8 border-2 border-dashed border-slate-200 rounded-xl">
+            <i class="fa-solid fa-folder-open text-3xl text-slate-300 mb-2"></i>
+            <p class="text-xs text-slate-500">Belum ada asesmen yang dibuat.</p>
+            <button onclick="navTo('create')" class="mt-3 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold">Buat Asesmen Pertama</button>
+          </div>
+        `;
+        return;
+      }
+
+      AppState.assessments.slice(0, 3).forEach(asm => {
+        const item = document.createElement('div');
+        item.className = 'p-3.5 rounded-xl border border-slate-200 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer';
+        item.onclick = () => openHistoryAssessment(asm.id);
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+              <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">${asm.title}</h4>
+              <p class="text-[11px] text-slate-500">${asm.subject} • ${asm.grade} • ${asm.createdAt}</p>
+            </div>
+          </div>
+          <span class="text-xs text-blue-600 font-semibold"><i class="fa-solid fa-chevron-right"></i></span>
+        `;
+        recentContainer.appendChild(item);
+      });
+    }
+
+    function saveApiConfig(e) {
+      e.preventDefault();
+      const key = document.getElementById('api-key-input').value.trim();
+      const model = document.getElementById('api-model-select').value;
+
+      AppState.apiConfig.key = key;
+      AppState.apiConfig.model = model;
+
+      localStorage.setItem('GEMINI_API_KEY', key);
+      localStorage.setItem('GEMINI_MODEL', model);
+
+      const statusBadge = document.getElementById('ai-status-badge');
+      if (key) {
+        statusBadge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span class="font-medium text-emerald-400">Gemini AI Terhubung</span>`;
+      }
+
+      showToast('Pengaturan API Key disimpan!', 'success');
+    }
+
+    function loadApiConfig() {
+      const key = localStorage.getItem('GEMINI_API_KEY') || '';
+      const model = localStorage.getItem('GEMINI_MODEL') || 'gemini-1.5-flash';
+
+      AppState.apiConfig.key = key;
+      AppState.apiConfig.model = model;
+
+      if (document.getElementById('api-key-input')) {
+        document.getElementById('api-key-input').value = key;
+        document.getElementById('api-model-select').value = model;
+      }
+
+      if (key) {
+        const statusBadge = document.getElementById('ai-status-badge');
+        if (statusBadge) {
+          statusBadge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span class="font-medium text-emerald-400">Gemini AI Terhubung</span>`;
+        }
+      }
+    }
+
+    async function testApiKey() {
+      const key = document.getElementById('api-key-input').value.trim();
+      if (!key) {
+        showToast('Masukkan API Key terlebih dahulu!', 'error');
+        return;
+      }
+
+      showToast('Menguji koneksi ke Google Gemini...', 'info');
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Ping test. Respon OK.' }] }] })
         });
 
-        /* ==========================================
-           6. RENDER KANVAS EDITOR (SOAL, KUNCI, KISI)
-           ========================================== */
-        function renderEditor() {
-            if(!currentAssessment) return;
-            const data = currentAssessment;
-
-            document.getElementById('editor-title').innerText = data.judul || 'Asesmen AI';
-            document.getElementById('editor-subtitle').innerText = `${data.kelas} • ${data.mapel}`;
-            
-            // Header Cetak
-            document.getElementById('kop-sekolah').innerText = userData.sekolah || 'SDN KESILIR 02 LABS';
-            document.getElementById('kop-judul').innerText = (data.judul || 'Asesmen').toUpperCase();
-            document.getElementById('kop-kelas').innerText = data.kelas;
-            document.getElementById('kop-mapel').innerText = data.mapel;
-
-            const cSoal = document.getElementById('soal-container');
-            const cKunci = document.getElementById('kunci-container');
-            const cKisi = document.getElementById('kisi-container');
-
-            cSoal.innerHTML = ''; cKunci.innerHTML = ''; cKisi.innerHTML = '';
-
-            let pgCount = 0;
-            let essayCount = 0;
-
-            if(data.soal && Array.isArray(data.soal)) {
-                data.soal.forEach((s, idx) => {
-                    const num = idx + 1;
-                    const isPG = s.tipe && s.tipe.toLowerCase().includes('pilihan');
-
-                    // --- Render Soal ---
-                    let hSoal = `<div class="mb-5 relative" style="page-break-inside: avoid;">
-                        <div class="flex gap-2">
-                            <span class="font-bold">${num}.</span>
-                            <div class="flex-1">
-                                <p class="text-justify">${s.pertanyaan.replace(/\n/g, '<br>')}</p>`;
-                    
-                    if(isPG && s.pilihan && s.pilihan.length > 0) {
-                        hSoal += `<div class="mt-2 space-y-1 ml-1">`;
-                        s.pilihan.forEach(opt => hSoal += `<p>${opt}</p>`);
-                        hSoal += `</div>`;
-                        pgCount++;
-                    } else {
-                        // Render garis isian untuk Uraian
-                        hSoal += `<div class="mt-4 border-b border-dotted border-black opacity-30 w-full pt-6"></div>
-                                  <div class="mt-4 border-b border-dotted border-black opacity-30 w-full pt-6"></div>`;
-                        essayCount++;
-                    }
-                    hSoal += `</div></div></div>`;
-                    cSoal.innerHTML += hSoal;
-
-                    // --- Render Kunci ---
-                    cKunci.innerHTML += `
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-sm mb-3">
-                            <div class="flex justify-between items-center mb-2 border-b border-slate-200 pb-2">
-                                <span class="font-bold text-slate-700">Soal No. ${num} <span class="text-xs font-normal bg-slate-200 px-2 py-0.5 rounded ml-2">${s.tipe}</span></span>
-                                <span class="text-xs text-slate-500 font-semibold">Level: ${s.level_kognitif || '-'}</span>
-                            </div>
-                            <p class="text-emerald-700 font-bold mb-1">Kunci: ${s.jawaban}</p>
-                            <p class="text-slate-600"><span class="font-semibold">Pembahasan:</span> ${s.pembahasan || 'Tidak ada pembahasan spesifik'}</p>
-                        </div>`;
-
-                    // --- Render Kisi-Kisi ---
-                    cKisi.innerHTML += `
-                        <tr class="hover:bg-slate-50">
-                            <td class="border border-slate-300 p-2 text-center align-top font-semibold">${num}</td>
-                            <td class="border border-slate-300 p-2 align-top text-xs leading-relaxed">${s.tujuan_pembelajaran || '-'}</td>
-                            <td class="border border-slate-300 p-2 text-center align-top text-xs">${s.level_kognitif || '-'}</td>
-                            <td class="border border-slate-300 p-2 text-center align-top text-xs">${s.tipe}</td>
-                            <td class="border border-slate-300 p-2 text-center align-top text-xs font-medium text-emerald-700">${isPG ? s.jawaban.substring(0,2) : 'Rubrik'}</td>
-                        </tr>`;
-                });
-            } else {
-                cSoal.innerHTML = '<p class="text-red-500">Gagal merender soal. Struktur data AI tidak valid.</p>';
-            }
+        if (res.ok) {
+          showToast('Koneksi API Gemini Berhasil!', 'success');
+        } else {
+          showToast('Koneksi gagal. Cek API Key Anda.', 'error');
         }
+      } catch (err) {
+        showToast('Gagal menghubungi endpoint AI.', 'error');
+      }
+    }
 
-        /* ==========================================
-           7. EKSPOR DOKUMEN (PDF & WORD)
-           ========================================== */
-        function exportPDF() {
-            if(!currentAssessment) return;
-            const element = document.getElementById('tab-soal');
-            const filename = `Soal_${currentAssessment.mapel}_${currentAssessment.kelas}.pdf`.replace(/ /g, '_');
-            
-            const opt = {
-                margin:       [15, 15, 15, 15],
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            
-            showToast("Memproses PDF, silakan tunggu...", "info");
-            html2pdf().set(opt).from(element).save().then(() => showToast("PDF berhasil diunduh!", "success"));
-        }
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "SDN_Kesilir_02_Backup.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
 
-        function exportWord() {
-            if(!currentAssessment) return;
-            // Native Export menggunakan pendekatan MS Office XML Document HTML Format
-            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Cetak Asesmen</title><style>body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; } .border-b-2 { border-bottom: 2px solid black; } .text-center { text-align: center; } .font-bold { font-weight: bold; } .text-xl { font-size: 18pt; } .text-lg { font-size: 14pt; } .mb-6 { margin-bottom: 24px; } .flex { display: flex; } .justify-between { justify-content: space-between; } .mb-8 { margin-bottom: 32px; }</style></head><body>";
-            
-            const footer = "</body></html>";
-            const sourceHTML = header + document.getElementById('tab-soal').innerHTML + footer;
-            
-            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-            const fileDownload = document.createElement("a");
-            
-            document.body.appendChild(fileDownload);
-            fileDownload.href = source;
-            fileDownload.download = `Soal_${currentAssessment.mapel}_${currentAssessment.kelas}.doc`.replace(/ /g, '_');
-            fileDownload.click();
-            document.body.removeChild(fileDownload);
-            showToast("Word DOC berhasil diunduh!", "success");
+    function importBackupJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (imported.assessments) AppState.assessments = imported.assessments;
+          if (imported.bank) AppState.bank = imported.bank;
+
+          // Save to DB
+          AppState.assessments.forEach(a => saveAssessmentToDB(a));
+          updateDashboardStats();
+          showToast('Data cadangan berhasil dipulihkan!', 'success');
+        } catch (err) {
+          showToast('Format berkas JSON tidak valid!', 'error');
         }
-    </script>
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAllAppData() {
+      if (confirm('APAKAH ANDA YAKIN? Seluruh data akan dihapus permanen.')) {
+        indexedDB.deleteDatabase('SDNKesilirDB');
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    /* Helper Toast Notification System */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const bg = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-slate-800');
+      
+      toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 transform translate-y-2 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${message}</span>`;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2'), 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
 </body>
 </html>

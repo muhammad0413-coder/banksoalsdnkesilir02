@@ -32,25 +32,28 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #0b0f17; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        
         @media print {
             aside, header, nav, .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
             main { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
-            .print-area { background: white !important; color: black !important; border: none !important; }
+            .print-area { background: white !important; color: black !important; border: none !important; shadow: none !important; padding: 0 !important; }
+            .print-area svg { max-width: 100% !important; height: auto !important; }
         }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 font-sans min-h-screen flex antialiased">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-darksidebar border-r border-slate-800 flex flex-col justify-between shrink-0 hidden md:flex sticky top-0 h-screen">
+    <aside class="w-64 bg-darksidebar border-r border-slate-800 flex flex-col justify-between shrink-0 hidden md:flex sticky top-0 h-screen no-print">
         <div>
             <div class="p-5 border-b border-slate-800/80 flex items-center gap-3">
                 <div class="w-9 h-9 bg-slate-800 rounded-xl border border-slate-700 flex items-center justify-center text-yellow-400 font-bold">
-                    <i class="fa-solid fa-cat text-lg"></i>
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
                 </div>
                 <div>
                     <h1 class="font-extrabold text-sm tracking-wide text-white leading-tight">SDN KESILIR 02</h1>
-                    <p class="text-[10px] text-emerald-400 font-medium tracking-wider uppercase">AI Labs</p>
+                    <p class="text-[10px] text-emerald-400 font-medium tracking-wider uppercase">AI Labs Jember</p>
                 </div>
             </div>
 
@@ -78,9 +81,9 @@
     <!-- CONTENT AREA -->
     <div class="flex-grow flex flex-col min-w-0 h-screen overflow-y-auto custom-scrollbar">
 
-        <header class="md:hidden bg-darksidebar border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50">
+        <header class="md:hidden bg-darksidebar border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-50 no-print">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-cat text-yellow-400"></i>
+                <i class="fa-solid fa-graduation-cap text-yellow-400"></i>
                 <span class="font-bold text-sm">SDN KESILIR 02 LABS</span>
             </div>
             <div class="flex gap-2 text-xs">
@@ -124,7 +127,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Sekolah / Institusi</label>
-                                <input type="text" id="id-sekolah" value="SDN KESILIR 02 LABS" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                <input type="text" id="id-sekolah" value="SDN KESILIR 02" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Nama Pendidik</label>
@@ -168,24 +171,24 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Mata Pelajaran</label>
-                                <input type="text" id="mat-mapel" placeholder="Contoh: Matematika" required class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                <input type="text" id="mat-mapel" value="Matematika" required class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Materi Pokok / Bab</label>
-                                <input type="text" id="mat-bab" placeholder="Contoh: Bangun Ruang" required class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                <input type="text" id="mat-bab" value="Bangun Ruang" required class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Sub Materi (Opsional)</label>
-                                <input type="text" id="mat-subbab" placeholder="Spesifikkan bila perlu" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                <input type="text" id="mat-subbab" value="Karakteristik, Jaring-Jaring, & Volume Kubus/Balok" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Capaian / Tujuan Pembelajaran (Opsional)</label>
+                                <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Capaian Pembelajaran (CP)</label>
                                 <textarea id="mat-cp" rows="3" placeholder="Kosongkan untuk auto-generate" class="w-full bg-darkinput border border-slate-700/80 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
                             </div>
                             <div>
@@ -202,13 +205,13 @@
                         </h3>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <!-- Jenis Asesmen Dropdown dengan 14 opsi lengkap -->
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Jenis Asesmen</label>
                                 <select id="eval-jenis" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                                     <option value="Diagnostik">Diagnostik</option>
                                     <option value="Formatif">Formatif</option>
-                                    <option value="Sumatif" selected>Sumatif</option>
+                                    <option value="Sumatif Ganjil (ASG)" selected>Sumatif Ganjil (ASG)</option>
+                                    <option value="Sumatif Genap">Sumatif Genap</option>
                                     <option value="PTS">PTS</option>
                                     <option value="PAS">PAS</option>
                                     <option value="PAT">PAT</option>
@@ -224,7 +227,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Jumlah Soal Total</label>
-                                <input type="number" id="eval-jumlah" value="10" min="1" max="40" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                <input type="number" id="eval-jumlah" value="40" min="1" max="50" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Alokasi Waktu</label>
@@ -240,40 +243,22 @@
                                     <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Pilihan Ganda</span>
                                 </label>
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda Kompleks" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">PG Kompleks</span>
+                                    <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda Kompleks" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">PG Kompleks</span>
                                 </label>
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Benar/Salah" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Benar/Salah</span>
+                                    <input type="checkbox" name="bentuk_soal" value="Benar/Salah" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Benar/Salah</span>
                                 </label>
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Menjodohkan" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Menjodohkan</span>
+                                    <input type="checkbox" name="bentuk_soal" value="Menjodohkan" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Menjodohkan</span>
                                 </label>
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Isian Singkat" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Isian Singkat</span>
+                                    <input type="checkbox" name="bentuk_soal" value="Isian Singkat" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Isian Singkat</span>
                                 </label>
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Uraian" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Uraian</span>
+                                    <input type="checkbox" name="bentuk_soal" value="Uraian" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Uraian / Esai</span>
                                 </label>
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Esai" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Esai</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Studi Kasus" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Studi Kasus</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Literasi" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Literasi</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Numerasi" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Numerasi</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Analisis Gambar" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Analisis Gambar</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="HOTS" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">HOTS</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="LOTS" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">LOTS</span>
+                                    <input type="checkbox" name="bentuk_soal" value="Studi Kasus" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Studi Kasus</span>
                                 </label>
                             </div>
                         </div>
@@ -289,12 +274,11 @@
                                 </select>
                             </div>
 
-                            <!-- Target Level Kognitif Bloom C1-C6 -->
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-2">Target Level Kognitif</label>
                                 <div class="grid grid-cols-2 gap-2 text-[11px]">
                                     <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C1 (Mengingat)" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C1 (Mengingat)
+                                        <input type="checkbox" name="level_kognitif" value="C1 (Mengingat)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C1 (Mengingat)
                                     </label>
                                     <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
                                         <input type="checkbox" name="level_kognitif" value="C2 (Memahami)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C2 (Memahami)
@@ -303,13 +287,13 @@
                                         <input type="checkbox" name="level_kognitif" value="C3 (Mengaplikasikan)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C3 (Mengaplikasikan)
                                     </label>
                                     <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C4 (Menganalisis)" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C4 (Menganalisis)
+                                        <input type="checkbox" name="level_kognitif" value="C4 (Menganalisis)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C4 (Menganalisis)
                                     </label>
                                     <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C5 (Mengevaluasi)" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C5 (Mengevaluasi)
+                                        <input type="checkbox" name="level_kognitif" value="C5 (Mengevaluasi)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C5 (Mengevaluasi)
                                     </label>
                                     <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C6 (Mencipta)" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C6 (Mencipta)
+                                        <input type="checkbox" name="level_kognitif" value="C6 (Mencipta)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C6 (Mencipta)
                                     </label>
                                 </div>
                             </div>
@@ -342,13 +326,40 @@
                     </div>
                 </div>
 
-                <div class="bg-white text-slate-900 p-8 rounded-xl shadow-2xl print-area min-h-[600px] text-xs leading-relaxed">
-                    <div class="text-center pb-4 mb-4 border-b-2 border-slate-900 font-bold">
-                        <h2 class="text-base uppercase" id="out-sekolah">SDN KESILIR 02 LABS</h2>
-                        <h3 class="text-sm uppercase tracking-wide mt-1" id="out-judul">NASKAH ASESMEN SUMATIF</h3>
+                <!-- TAMPILAN KOP & NASKAH UNTUK DICETAK -->
+                <div class="bg-white text-black p-8 rounded-xl shadow-2xl print-area min-h-[600px] text-xs leading-relaxed font-sans">
+                    
+                    <!-- KOP SOAL HASIL REVISI RESMI -->
+                    <div class="text-center border-b-4 border-double border-black pb-3 mb-4">
+                        <h3 class="text-sm font-bold tracking-wide uppercase leading-tight">Pemerintah Kabupaten Jember</h3>
+                        <h3 class="text-sm font-bold tracking-wide uppercase leading-tight">Dinas Pendidikan</h3>
+                        <h2 class="text-xl font-extrabold tracking-wider uppercase mt-1">Sekolah Dasar Negeri Kesilir 02</h2>
+                        <p class="text-xs italic mt-1 text-slate-800">Alamat: Jl. Ambulu No. 91, Kesilir, Wuluhan, Jember 68162</p>
                     </div>
 
-                    <div id="output-text" class="whitespace-pre-wrap font-sans">
+                    <!-- METADATA UNTUK SISWA -->
+                    <div class="text-center mb-4">
+                        <h3 class="text-base font-extrabold uppercase tracking-wide" id="out-judul-jenis">ASESMEN SUMATIF GANJIL (ASG)</h3>
+                        <p class="text-xs font-bold uppercase mt-0.5" id="out-judul-ta">TAHUN AJARAN 2026/2027</p>
+                    </div>
+
+                    <div class="border border-black p-3 text-xs leading-relaxed mb-6">
+                        <div class="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                            <div class="flex"><span class="w-32 font-semibold shrink-0">Mata Pelajaran</span><span class="mr-2">:</span><span id="out-mapel">Matematika</span></div>
+                            <div class="flex"><span class="w-32 font-semibold shrink-0">Nama Siswa</span><span class="mr-2">:</span><span class="border-b border-dotted border-black flex-grow">.......................................</span></div>
+                            
+                            <div class="flex"><span class="w-32 font-semibold shrink-0">Hari / Tanggal</span><span class="mr-2">:</span><span>[Disesuaikan]</span></div>
+                            <div class="flex"><span class="w-32 font-semibold shrink-0">No. Absen</span><span class="mr-2">:</span><span class="border-b border-dotted border-black flex-grow">.......................................</span></div>
+                            
+                            <div class="flex"><span class="w-32 font-semibold shrink-0">Kelas / Semester</span><span class="mr-2">:</span><span id="out-kelas-sem">IV (Empat) / I (Ganjil)</span></div>
+                            <div class="flex"><span class="w-32 font-semibold shrink-0">Alokasi Waktu</span><span class="mr-2">:</span><span id="out-waktu">90 Menit</span></div>
+                            
+                            <div class="flex col-span-2"><span class="w-32 font-semibold shrink-0">Materi Pokok</span><span class="mr-2">:</span><span id="out-materi">Bangun Ruang (Karakteristik, Jaring-Jaring, & Volume Kubus/Balok)</span></div>
+                        </div>
+                    </div>
+
+                    <!-- AREA TEKS SOAL TERFORMAT LENGKAP WITH SVG -->
+                    <div id="output-text" class="font-sans leading-relaxed text-slate-900 space-y-4">
                         Belum ada naskah yang dihasilkan.
                     </div>
                 </div>
@@ -396,6 +407,26 @@
             if(tabName === 'bank-soal') renderBankSoal();
         }
 
+        function formatMarkdownToHTML(text) {
+            if (!text) return '';
+            
+            // Format Bold, Headers, and Clean tags
+            let formatted = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>\$1</em>')
+                .replace(/^### (.*\$)/gim, '<h3 class="text-sm font-bold mt-4 mb-2">\$1</h3>')
+                .replace(/^## (.*\$)/gim, '<h2 class="text-base font-bold mt-6 mb-3 border-b border-black pb-1 uppercase">\$1</h2>')
+                .replace(/^# (.*\$)/gim, '<h1 class="text-lg font-extrabold mt-6 mb-3">\$1</h1>')
+                .replace(/\n/g, '<br>');
+
+            // Protect SVG code lines from getting corrupted by <br>
+            formatted = formatted.replace(/<svg[\s\S]*?<\/svg>/gi, function(match) {
+                return match.replace(/<br\s*\/?>/gi, ' ');
+            });
+
+            return formatted;
+        }
+
         async function handleGenerate(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-generate-act');
@@ -435,9 +466,17 @@
                 const data = await res.json();
                 
                 const resultText = data.data || data.result || JSON.stringify(data, null, 2);
-                document.getElementById('out-sekolah').innerText = payload.sekolah.toUpperCase();
-                document.getElementById('out-judul').innerText = `NASKAH ASESMEN ${payload.jenisAsesmen.toUpperCase()} - ${payload.subject.toUpperCase()} KELAS ${payload.kelas}`;
-                document.getElementById('output-text').innerText = resultText;
+
+                // Update Metadata Header
+                document.getElementById('out-judul-jenis').innerText = `ASESMEN ${payload.jenisAsesmen.toUpperCase()}`;
+                document.getElementById('out-judul-ta').innerText = `TAHUN AJARAN ${payload.tahunAjaran}`;
+                document.getElementById('out-mapel').innerText = payload.subject;
+                document.getElementById('out-kelas-sem').innerText = `${payload.kelas} / ${payload.semester}`;
+                document.getElementById('out-waktu').innerText = payload.alokasiWaktu;
+                document.getElementById('out-materi').innerText = `${payload.topic} ${payload.subTopic ? `(\${payload.subTopic})` : ''}`;
+
+                // Render content inside innerHTML to support inline SVGs
+                document.getElementById('output-text').innerHTML = formatMarkdownToHTML(resultText);
 
                 bankSoalData.push({
                     id: Date.now(),
@@ -479,7 +518,7 @@
         function bukaSoalBank(id) {
             const item = bankSoalData.find(x => x.id === id);
             if(item) {
-                document.getElementById('output-text').innerText = item.content;
+                document.getElementById('output-text').innerHTML = formatMarkdownToHTML(item.content);
                 switchTab('naskah');
             }
         }

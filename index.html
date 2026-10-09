@@ -31,7 +31,7 @@
         body { background-color: #0b0f17; color: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #0b0f17; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; rounded: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
         @media print {
             aside, header, nav, .no-print { display: none !important; }
             main { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
@@ -202,12 +202,24 @@
                         </h3>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Jenis Asesmen Dropdown dengan 14 opsi lengkap -->
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Jenis Asesmen</label>
                                 <select id="eval-jenis" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-                                    <option value="Sumatif" selected>Sumatif</option>
-                                    <option value="Formatif">Formatif</option>
                                     <option value="Diagnostik">Diagnostik</option>
+                                    <option value="Formatif">Formatif</option>
+                                    <option value="Sumatif" selected>Sumatif</option>
+                                    <option value="PTS">PTS</option>
+                                    <option value="PAS">PAS</option>
+                                    <option value="PAT">PAT</option>
+                                    <option value="Ujian Sekolah">Ujian Sekolah</option>
+                                    <option value="Pre-Test">Pre-Test</option>
+                                    <option value="Post-Test">Post-Test</option>
+                                    <option value="Kuis">Kuis</option>
+                                    <option value="Remedial">Remedial</option>
+                                    <option value="Pengayaan">Pengayaan</option>
+                                    <option value="Proyek">Proyek</option>
+                                    <option value="Praktik">Praktik</option>
                                 </select>
                             </div>
                             <div>
@@ -220,7 +232,7 @@
                             </div>
                         </div>
 
-                        <!-- 10 Bentuk Soal Checkboxes -->
+                        <!-- Variasi Bentuk Soal Checkboxes -->
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-400 mb-2">Bentuk Soal (Pilih minimal 1)</label>
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
@@ -254,6 +266,15 @@
                                 <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
                                     <input type="checkbox" name="bentuk_soal" value="Numerasi" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Numerasi</span>
                                 </label>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="Analisis Gambar" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Analisis Gambar</span>
+                                </label>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="HOTS" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">HOTS</span>
+                                </label>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="LOTS" class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">LOTS</span>
+                                </label>
                             </div>
                         </div>
 
@@ -268,7 +289,7 @@
                                 </select>
                             </div>
 
-                            <!-- Level Kognitif Bloom C1-C6 -->
+                            <!-- Target Level Kognitif Bloom C1-C6 -->
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-2">Target Level Kognitif</label>
                                 <div class="grid grid-cols-2 gap-2 text-[11px]">
@@ -347,7 +368,7 @@
             <section id="tab-settings" class="tab-panel hidden space-y-4">
                 <div class="bg-darkcard border border-slate-800 rounded-xl p-5 shadow-lg max-w-xl">
                     <h3 class="text-sm font-bold text-white mb-3">Pengaturan Profil Sekolah</h3>
-                    <p class="text-xs text-slate-400">Pengaturan ini akan tersimpan otomatis di browser Anda.</p>
+                    <p class="text-xs text-slate-400">Pengaturan ini tersimpan secara lokal pada browser Anda.</p>
                 </div>
             </section>
 
@@ -415,15 +436,15 @@
                 
                 const resultText = data.data || data.result || JSON.stringify(data, null, 2);
                 document.getElementById('out-sekolah').innerText = payload.sekolah.toUpperCase();
-                document.getElementById('out-judul').innerText = `NASKAH ASESMEN ${payload.subject.toUpperCase()} - KELAS ${payload.kelas}`;
+                document.getElementById('out-judul').innerText = `NASKAH ASESMEN ${payload.jenisAsesmen.toUpperCase()} - ${payload.subject.toUpperCase()} KELAS ${payload.kelas}`;
                 document.getElementById('output-text').innerText = resultText;
 
-                // Simpan ke Local Bank Soal
                 bankSoalData.push({
                     id: Date.now(),
                     subject: payload.subject,
                     kelas: payload.kelas,
                     topic: payload.topic,
+                    jenis: payload.jenisAsesmen,
                     date: new Date().toLocaleDateString('id-ID'),
                     content: resultText
                 });
@@ -447,7 +468,7 @@
             container.innerHTML = bankSoalData.map(item => `
                 <div class="p-3 bg-darkinput border border-slate-800 rounded-lg flex justify-between items-center text-xs">
                     <div>
-                        <span class="font-bold text-white">${item.subject} (Kelas ${item.kelas})</span>
+                        <span class="font-bold text-white">${item.subject} (${item.jenis}) - Kelas ${item.kelas}</span>
                         <p class="text-slate-400 text-[11px]">${item.topic} &bull; ${item.date}</p>
                     </div>
                     <button onclick="bukaSoalBank(${item.id})" class="text-emerald-400 hover:underline font-semibold">Lihat Naskah</button>

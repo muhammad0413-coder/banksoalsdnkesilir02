@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/health",
+      "dest": "/api/health.mjs"
+    },
+    {
+      "src": "/api/generate",
+      "dest": "/api/generate.mjs"
+    },
+    {
+      "src": "/api/check",
+      "dest": "/api/check.mjs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

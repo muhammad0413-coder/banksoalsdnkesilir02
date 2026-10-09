@@ -59,41 +59,48 @@ PETUNJUK FORMAT OUTPUT:
 4. Sertakan KUNCI JAWABAN LENGKAP dan PEDOMAN PENSKORAN di bagian paling akhir.
 `;
 
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: promptText }]
-          }
-        ]
-      })
-    });
+  // Daftar model yang akan dicoba secara berurutan jika terjadi error antrean tinggi
+  const candidateModels = [
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro'
+  ];
 
-    const data = await response.json();
+  let lastErrorMessage = '';
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        success: false,
-        error: data.error?.message || 'Gagal terhubung ke Gemini API.'
+  for (const modelName of candidateModels) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: promptText }]
+            }
+          ]
+        })
       });
+
+      const data = await response.json();
+
+      if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        return res.status(200).json({
+          success: true,
+          data: data.candidates[0].content.parts[0].text
+        });
+      }
+
+      lastErrorMessage = data.error?.message || `Gagal memproses dengan ${modelName}`;
+    } catch (err) {
+      lastErrorMessage = err.message;
     }
-
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Gagal menghasilkan teks naskah soal.';
-
-    return res.status(200).json({
-      success: true,
-      data: generatedText
-    });
-
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      error: err.message
-    });
   }
+
+  return res.status(503).json({
+    success: false,
+    error: `Server Google AI sedang mengalami beban lalu lintas tinggi pada semua jalur. Silakan klik tombol Generate kembali dalam beberapa detik. (Detail: ${lastErrorMessage})`
+  });
 }

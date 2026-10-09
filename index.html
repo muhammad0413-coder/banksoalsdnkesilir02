@@ -33,12 +33,80 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #0b0f17; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
         
+        /* ATURAN CETAK DOKUMEN / PRINT CSS (PRESISI & RAPI) */
         @media print {
-            aside, header, nav, .no-print { display: none !important; }
-            body { background: white !important; color: black !important; }
-            main { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
-            .print-area { background: white !important; color: black !important; border: none !important; shadow: none !important; padding: 0 !important; }
-            .print-area svg { max-width: 100% !important; height: auto !important; }
+            @page {
+                size: A4 portrait;
+                margin: 1.5cm 1.2cm 1.5cm 1.2cm;
+            }
+            
+            /* Sembunyikan elemen Navigasi & UI Web saat Print */
+            aside, header, nav, .no-print, button { 
+                display: none !important; 
+            }
+            
+            /* Ubah Warna Dasar Layar ke Mode Kertas Putih */
+            body, html { 
+                background: #ffffff !important; 
+                color: #000000 !important; 
+                font-family: 'Times New Roman', Times, serif !important;
+                font-size: 11pt !important;
+                line-height: 1.4 !important;
+            }
+            
+            main { 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                width: 100% !important; 
+                max-width: 100% !important; 
+            }
+            
+            .print-area { 
+                background: #ffffff !important; 
+                color: #000000 !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                width: 100% !important;
+            }
+
+            /* Cegah Soal dan Gambar Terpotong Antar Halaman (Page Break Prevention) */
+            .soal-block, .question-item, p, blockquote, tr, table {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Konversi Gambar SVG Agar Hemat Tinta Saat Dicetak */
+            svg {
+                background: #ffffff !important;
+                border: 1px solid #000000 !important;
+                max-width: 100% !important;
+                height: auto !important;
+                margin: 8px 0 !important;
+            }
+            
+            svg text {
+                fill: #000000 !important;
+                font-family: Arial, sans-serif !important;
+            }
+            
+            svg path, svg rect, svg line, svg circle, svg polygon {
+                stroke: #000000 !important;
+            }
+
+            /* Format Tabel Agar Garis Cetak Jelas */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin: 10px 0 !important;
+            }
+            
+            th, td {
+                border: 1px solid #000000 !important;
+                padding: 6px 8px !important;
+                color: #000000 !important;
+            }
         }
     </style>
 </head>
@@ -67,9 +135,6 @@
                 <button onclick="switchTab('bank-soal')" id="side-bank-soal" class="nav-side-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
                     <i class="fa-solid fa-box-archive text-sm w-4 text-center"></i> Bank Soal
                 </button>
-                <button onclick="switchTab('settings')" id="side-settings" class="nav-side-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition">
-                    <i class="fa-solid fa-gear text-sm w-4 text-center"></i> Settings
-                </button>
             </nav>
         </div>
 
@@ -87,7 +152,6 @@
                 <span class="font-bold text-sm">SDN KESILIR 02 LABS</span>
             </div>
             <div class="flex gap-2 text-xs">
-                <button onclick="switchTab('dashboard')" class="p-2 bg-slate-800 rounded-lg"><i class="fa-solid fa-house"></i></button>
                 <button onclick="switchTab('buat-asesmen')" class="p-2 bg-emerald-600 rounded-lg text-white"><i class="fa-solid fa-plus"></i></button>
                 <button onclick="switchTab('bank-soal')" class="p-2 bg-slate-800 rounded-lg"><i class="fa-solid fa-folder"></i></button>
             </div>
@@ -185,17 +249,6 @@
                                 <input type="text" id="mat-subbab" value="Karakteristik, Jaring-Jaring, & Volume Kubus/Balok" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Capaian Pembelajaran (CP)</label>
-                                <textarea id="mat-cp" rows="3" placeholder="Kosongkan untuk auto-generate" class="w-full bg-darkinput border border-slate-700/80 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Referensi Materi (Opsional)</label>
-                                <textarea id="mat-referensi" rows="3" placeholder="Paste teks materi disini..." class="w-full bg-darkinput border border-slate-700/80 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 resize-none"></textarea>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- SPESIFIKASI EVALUASI -->
@@ -208,21 +261,11 @@
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Jenis Asesmen</label>
                                 <select id="eval-jenis" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-                                    <option value="Diagnostik">Diagnostik</option>
-                                    <option value="Formatif">Formatif</option>
                                     <option value="Sumatif Ganjil (ASG)" selected>Sumatif Ganjil (ASG)</option>
-                                    <option value="Sumatif Genap">Sumatif Genap</option>
+                                    <option value="Ujian Sekolah">Ujian Sekolah</option>
+                                    <option value="Formatif">Formatif</option>
                                     <option value="PTS">PTS</option>
                                     <option value="PAS">PAS</option>
-                                    <option value="PAT">PAT</option>
-                                    <option value="Ujian Sekolah">Ujian Sekolah</option>
-                                    <option value="Pre-Test">Pre-Test</option>
-                                    <option value="Post-Test">Post-Test</option>
-                                    <option value="Kuis">Kuis</option>
-                                    <option value="Remedial">Remedial</option>
-                                    <option value="Pengayaan">Pengayaan</option>
-                                    <option value="Proyek">Proyek</option>
-                                    <option value="Praktik">Praktik</option>
                                 </select>
                             </div>
                             <div>
@@ -237,72 +280,29 @@
 
                         <!-- Variasi Bentuk Soal Checkboxes -->
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-400 mb-2">Bentuk Soal (Pilih minimal 1)</label>
+                            <label class="block text-[11px] font-semibold text-slate-400 mb-2">Bentuk Soal</label>
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Pilihan Ganda</span>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda" checked class="rounded bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Pilihan Ganda</span>
                                 </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda Kompleks" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">PG Kompleks</span>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="Pilihan Ganda Kompleks" checked class="rounded bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">PG Kompleks</span>
                                 </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Benar/Salah" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Benar/Salah</span>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="Benar/Salah" checked class="rounded bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Benar/Salah</span>
                                 </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Menjodohkan" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Menjodohkan</span>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="Menjodohkan" checked class="rounded bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Menjodohkan</span>
                                 </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Isian Singkat" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Isian Singkat</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Uraian" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Uraian / Esai</span>
-                                </label>
-                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
-                                    <input type="checkbox" name="bentuk_soal" value="Studi Kasus" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Studi Kasus</span>
+                                <label class="flex items-center gap-2 bg-darkinput p-2 rounded-lg border border-slate-800 cursor-pointer">
+                                    <input type="checkbox" name="bentuk_soal" value="Isian Singkat" checked class="rounded bg-slate-900 text-emerald-500"> <span class="text-slate-300 text-[11px]">Isian Singkat</span>
                                 </label>
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-1.5">Tingkat Kesulitan</label>
-                                <select id="eval-kesulitan" class="w-full bg-darkinput border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-                                    <option value="Campuran" selected>Campuran</option>
-                                    <option value="Mudah">Mudah</option>
-                                    <option value="Sedang">Sedang</option>
-                                    <option value="Sukar (HOTS)">Sukar (HOTS)</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 mb-2">Target Level Kognitif</label>
-                                <div class="grid grid-cols-2 gap-2 text-[11px]">
-                                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C1 (Mengingat)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C1 (Mengingat)
-                                    </label>
-                                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C2 (Memahami)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C2 (Memahami)
-                                    </label>
-                                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C3 (Mengaplikasikan)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C3 (Mengaplikasikan)
-                                    </label>
-                                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C4 (Menganalisis)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C4 (Menganalisis)
-                                    </label>
-                                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C5 (Mengevaluasi)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C5 (Mengevaluasi)
-                                    </label>
-                                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="level_kognitif" value="C6 (Mencipta)" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500"> C6 (Mencipta)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
                     <div class="flex justify-end pt-2">
-                        <button type="submit" id="btn-generate-act" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-emerald-950/50 flex items-center gap-2 transition transform active:scale-95">
+                        <button type="submit" id="btn-generate-act" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 transition">
                             <i class="fa-solid fa-gear"></i> Generate Asesmen
                         </button>
                     </div>
@@ -329,7 +329,7 @@
                 <!-- TAMPILAN KOP & NASKAH UNTUK DICETAK -->
                 <div class="bg-white text-black p-8 rounded-xl shadow-2xl print-area min-h-[600px] text-xs leading-relaxed font-sans">
                     
-                    <!-- KOP SOAL HASIL REVISI RESMI -->
+                    <!-- KOP SOAL RESMI JEMBER -->
                     <div class="text-center border-b-4 border-double border-black pb-3 mb-4">
                         <h3 class="text-sm font-bold tracking-wide uppercase leading-tight">Pemerintah Kabupaten Jember</h3>
                         <h3 class="text-sm font-bold tracking-wide uppercase leading-tight">Dinas Pendidikan</h3>
@@ -375,14 +375,6 @@
                 </div>
             </section>
 
-            <!-- SETTINGS TAB -->
-            <section id="tab-settings" class="tab-panel hidden space-y-4">
-                <div class="bg-darkcard border border-slate-800 rounded-xl p-5 shadow-lg max-w-xl">
-                    <h3 class="text-sm font-bold text-white mb-3">Pengaturan Profil Sekolah</h3>
-                    <p class="text-xs text-slate-400">Pengaturan ini tersimpan secara lokal pada browser Anda.</p>
-                </div>
-            </section>
-
         </main>
     </div>
 
@@ -407,21 +399,27 @@
             if(tabName === 'bank-soal') renderBankSoal();
         }
 
+        // FUNGSI PEMPROSES FORMAT DOKUMEN & PEMBUNGKUS SOAL
         function formatMarkdownToHTML(text) {
             if (!text) return '';
             
-            // Format Bold, Headers, and Clean tags
+            // Format Cetak Tebal, Judul, dan Pembungkus Soal untuk Mencegah Pemotongan Cetak
             let formatted = text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>\$1</em>')
-                .replace(/^### (.*\$)/gim, '<h3 class="text-sm font-bold mt-4 mb-2">\$1</h3>')
-                .replace(/^## (.*\$)/gim, '<h2 class="text-base font-bold mt-6 mb-3 border-b border-black pb-1 uppercase">\$1</h2>')
+                .replace(/^### (.*\$)/gim, '<h3 class="text-sm font-bold mt-4 mb-2 border-b border-black pb-1">\$1</h3>')
+                .replace(/^## (.*\$)/gim, '<h2 class="text-base font-bold mt-6 mb-3 border-b-2 border-black pb-1 uppercase page-break-before">\$1</h2>')
                 .replace(/^# (.*\$)/gim, '<h1 class="text-lg font-extrabold mt-6 mb-3">\$1</h1>')
                 .replace(/\n/g, '<br>');
 
-            // Protect SVG code lines from getting corrupted by <br>
+            // Lindungi Blok SVG dari Karakter Pemutus Baris
             formatted = formatted.replace(/<svg[\s\S]*?<\/svg>/gi, function(match) {
-                return match.replace(/<br\s*\/?>/gi, ' ');
+                return '<div class="svg-container my-2 text-center break-inside-avoid">' + match.replace(/<br\s*\/?>/gi, ' ') + '</div>';
+            });
+
+            // Bungkus Setiap Nomor Soal ke Dalam Container Khusus "soal-block" agar Tidak Terpotong Halaman
+            formatted = formatted.replace(/(\d+\.\s+[\s\S]*?)(?=(?:\d+\.\s+|\$))/g, function(match) {
+                return '<div class="soal-block my-3 break-inside-avoid" style="page-break-inside: avoid;">' + match + '</div>';
             });
 
             return formatted;
@@ -435,7 +433,6 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Menyusun Naskah Soal...`;
 
             const bentukSoalArr = Array.from(document.querySelectorAll('input[name="bentuk_soal"]:checked')).map(cb => cb.value);
-            const levelKognitifArr = Array.from(document.querySelectorAll('input[name="level_kognitif"]:checked')).map(cb => cb.value);
 
             const payload = {
                 sekolah: document.getElementById('id-sekolah').value,
@@ -447,14 +444,10 @@
                 subject: document.getElementById('mat-mapel').value,
                 topic: document.getElementById('mat-bab').value,
                 subTopic: document.getElementById('mat-subbab').value,
-                cp: document.getElementById('mat-cp').value,
-                referensi: document.getElementById('mat-referensi').value,
                 jenisAsesmen: document.getElementById('eval-jenis').value,
                 jumlahSoal: document.getElementById('eval-jumlah').value,
                 alokasiWaktu: document.getElementById('eval-waktu').value,
-                kesulitan: document.getElementById('eval-kesulitan').value,
-                bentukSoal: bentukSoalArr,
-                levelKognitif: levelKognitifArr
+                bentukSoal: bentukSoalArr
             };
 
             try {
@@ -475,7 +468,7 @@
                 document.getElementById('out-waktu').innerText = payload.alokasiWaktu;
                 document.getElementById('out-materi').innerText = `${payload.topic} ${payload.subTopic ? `(\${payload.subTopic})` : ''}`;
 
-                // Render content inside innerHTML to support inline SVGs
+                // Render HTML & SVG
                 document.getElementById('output-text').innerHTML = formatMarkdownToHTML(resultText);
 
                 bankSoalData.push({

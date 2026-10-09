@@ -1,0 +1,11 @@
+{
+  "name": "sdn-kesilir-02-labs",
+  "version": "1.0.0",
+  "description": "SDN KESILIR 02 LABS - AI Assessment Generator for Teachers",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {}
+}

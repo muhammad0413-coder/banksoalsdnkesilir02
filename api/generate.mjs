@@ -59,11 +59,13 @@ PETUNJUK FORMAT OUTPUT:
 4. Sertakan KUNCI JAWABAN LENGKAP dan PEDOMAN PENSKORAN di bagian paling akhir.
 `;
 
-  // Daftar model yang akan dicoba secara berurutan jika terjadi error antrean tinggi
+  // Daftar model aktif resmi Gemini API (diurutkan berdasarkan prioritas performa & stabilitas)
   const candidateModels = [
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro'
+    'gemini-3.8-flash',
+    'gemini-3.7-flash',
+    'gemini-3.5-flash',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro'
   ];
 
   let lastErrorMessage = '';
@@ -101,6 +103,6 @@ PETUNJUK FORMAT OUTPUT:
 
   return res.status(503).json({
     success: false,
-    error: `Server Google AI sedang mengalami beban lalu lintas tinggi pada semua jalur. Silakan klik tombol Generate kembali dalam beberapa detik. (Detail: ${lastErrorMessage})`
+    error: `Gagal menghasilkan soal dari server Google AI. (Detail: ${lastErrorMessage})`
   });
 }
